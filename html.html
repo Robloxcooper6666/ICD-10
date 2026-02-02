@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICD-10 代碼查詢系統</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; line-height: 1.6; }
+        .container { max-width: 800px; margin: auto; }
+        input { width: 100%; padding: 10px; margin-bottom: 20px; box-sizing: border-box; font-size: 16px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        tr:hover { background-color: #f9f9f9; }
+        .no-result { color: #888; text-align: center; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>ICD-10 疾病代碼查詢</h2>
+    <input type="text" id="searchInput" placeholder="輸入代碼、英文名稱或中文關鍵字 (例如: A00, Cholera, 霍亂)...">
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 20%;">代碼</th>
+                <th style="width: 40%;">英文名稱</th>
+                <th style="width: 40%;">中文名稱</th>
+            </tr>
+        </thead>
+        <tbody id="resultBody">
+            </tbody>
+    </table>
+    <div id="noResult" class="no-result" style="display: none;">找不到相符的代碼。</div>
+</div>
+
+<script>
+    let icdData = [];
+
+    // 1. 從同資料夾載入 JSON 檔案
+    fetch('icd10_codes_combined.json')
+        .then(response => response.json())
+        .then(data => {
+            icdData = data;
+            // 初始顯示前 10 筆
+            displayResults(icdData.slice(0, 10));
+        })
+        .catch(error => console.error('無法讀取資料:', error));
+
+    // 2. 監聽輸入框事件
+    const searchInput = document.getElementById('searchInput');
+    const resultBody = document.getElementById('resultBody');
+    const noResult = document.getElementById('noResult');
+
+    searchInput.addEventListener('input', (e) => {
+        const keyword = e.target.value.toLowerCase().trim();
+
+        if (keyword === '') {
+            displayResults(icdData.slice(0, 10));
+            return;
+        }
+
+        // 3. 過濾資料 (代碼、英文、中文)
+        const filtered = icdData.filter(item =>
+            item.code.toLowerCase().includes(keyword) ||
+            item.en.toLowerCase().includes(keyword) ||
+            item.zh.includes(keyword)
+        );
+
+        displayResults(filtered);
+    });
+
+    // 4. 渲染表格
+    function displayResults(data) {
+        resultBody.innerHTML = '';
+        if (data.length === 0) {
+            noResult.style.display = 'block';
+            return;
+        }
+
+        noResult.style.display = 'none';
+        data.forEach(item => {
+            const row = `<tr>
+                <td><strong>${item.code}</strong></td>
+                <td>${item.en}</td>
+                <td>${item.zh}</td>
+            </tr>`;
+            resultBody.innerHTML += row;
+        });
+    }
+</script>
+
+</body>
+</html>
