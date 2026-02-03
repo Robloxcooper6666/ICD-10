@@ -151,9 +151,9 @@
 <div class="main-layout">
     <div class="search-section">
         <h2>ICD-10 診斷代碼核心</h2>
-        <div class="stats-info">SYSTEM READY: <span id="totalCount">...</span> CODES LOADED</div>
+        <div class="stats-info" id="statusMessage">正在串連遠端資料庫 (GitHub Raw)...</div>
 
-        <input type="text" id="searchInput" placeholder="搜尋代碼、疾病名稱 (中英文)...">
+        <input type="text" id="searchInput" placeholder="搜尋關鍵字，多組請用空格區隔 (如：骨折 鎖骨)">
 
         <table>
             <thead>
@@ -181,26 +181,46 @@
     let favorites = JSON.parse(localStorage.getItem('icdFav_v3') || '[]');
     let searchTimer;
 
-    // 1. 初始化資料
-    fetch('icd10_codes_combined.json')
-        .then(res => res.json())
-        .then(data => {
-            icdData = data;
-            document.getElementById('totalCount').innerText = data.length.toLocaleString();
-            renderFavorites();
-            performSearch('');
-        });
+    // 1. 初始化資料：串連 GitHub Raw 連結
+    async function init() {
+        const statusMsg = document.getElementById('statusMessage');
+        // 使用 GitHub Raw 連結
+        const githubUrl = 'https://raw.githubusercontent.com/Robloxcooper6666/ICD-10/main/icd10_codes_combined.json';
+        
+        try {
+            const res = await fetch(githubUrl);
+            if (!res.ok) throw new Error('無法存取遠端檔案');
+            
+            icdData = await res.json();
+            statusMsg.innerHTML = `遠端連線成功: <span style="font-weight:bold">${icdData.length.toLocaleString()}</span> 筆診斷代碼已載入`;
+        } catch (e) {
+            console.error("資料載入失敗:", e);
+            statusMsg.innerHTML = `<span style="color:var(--danger)">⚠️ 遠端 Raw 串連失敗，請確認檔案路徑是否正確</span>`;
+            
+            // 預設演示資料
+            icdData = [
+                {code: "S42.009A", zh: "鎖骨骨折，閉鎖性", en: "Fracture of clavicle, closed"},
+                {code: "M19.011", zh: "肩關節骨關節炎", en: "Primary osteoarthritis, right shoulder"}
+            ];
+        }
+        
+        renderFavorites();
+        performSearch('');
+    }
 
-    // 2. 搜尋與渲染
+    // 2. 強化搜尋與渲染 (支援多關鍵字)
     function performSearch(q) {
-        const query = q.toLowerCase().trim();
-        const results = query === ''
-            ? icdData.slice(0, 12)
-            : icdData.filter(item =>
-                item.code.toLowerCase().includes(query) ||
-                item.en.toLowerCase().includes(query) ||
-                item.zh.includes(query)
-              ).slice(0, 50);
+        const keywords = q.toLowerCase().trim().split(/\s+/).filter(k => k.length > 0);
+        
+        let results;
+        if (keywords.length === 0) {
+            results = icdData.slice(0, 15);
+        } else {
+            results = icdData.filter(item => {
+                const searchContent = `${item.code} ${item.zh} ${item.en}`.toLowerCase();
+                return keywords.every(kw => searchContent.includes(kw));
+            }).slice(0, 50);
+        }
 
         renderTable(results);
     }
@@ -223,8 +243,8 @@
                     <td><span class="star ${isFav?'active':''}" onclick="toggleFav('${item.code}')">★</span></td>
                     <td class="code-cell">${item.code}</td>
                     <td>
-                        <div class="zh-name">${item.zh}</div>
-                        <div class="en-name">${item.en}</div>
+                        <div class="zh-name">${item.zh || '無中文名稱'}</div>
+                        <div class="en-name">${item.en || 'No English Name'}</div>
                     </td>
                 </tr>
             `;
@@ -264,12 +284,14 @@
         `).join('');
     }
 
-    // 4. 防抖
     document.getElementById('searchInput').addEventListener('input', (e) => {
         clearTimeout(searchTimer);
         searchTimer = setTimeout(() => performSearch(e.target.value), 200);
     });
+
+    init();
 </script>
 
 </body>
 </html>
+
