@@ -5,41 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ICD-10 代碼查詢系統</title>
     <style>
-        body { font-family: sans-serif; margin: 20px; line-height: 1.6; background-color: #fcfcfc; }
-        .container { max-width: 800px; margin: auto; }
-        input { width: 100%; padding: 12px; margin-bottom: 10px; box-sizing: border-box; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 20px; line-height: 1.6; background-color: #f8f9fa; color: #333; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        
+        h2 { margin-top: 0; color: #2c3e50; border-left: 5px solid #0288d1; padding-left: 15px; }
+        
+        /* 統計資訊樣式 */
+        .stats-info { margin-bottom: 20px; font-size: 0.95em; color: #666; background: #f0f7ff; padding: 10px 15px; border-radius: 6px; border: 1px solid #d0e3f5; }
+        .stats-info b { color: #0288d1; }
 
-        /* 常用查詢欄位樣式 */
-        .quick-search { margin-bottom: 20px; min-height: 30px; }
-        .quick-search label { font-size: 14px; color: #666; margin-right: 8px; }
+        input { width: 100%; padding: 14px; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; border: 2px solid #eee; border-radius: 8px; transition: border-color 0.3s; }
+        input:focus { outline: none; border-color: #0288d1; }
+
+        /* 熱門查詢樣式 */
+        .quick-search { margin-bottom: 25px; min-height: 35px; }
+        .quick-search label { font-size: 14px; color: #777; margin-right: 10px; display: block; margin-bottom: 8px; }
         .tag {
             display: inline-block;
             background: #e1f5fe;
             color: #0288d1;
-            padding: 5px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
             font-size: 13px;
             cursor: pointer;
-            margin-right: 5px;
-            margin-bottom: 5px;
+            margin-right: 8px;
+            margin-bottom: 8px;
             border: 1px solid #b3e5fc;
+            transition: all 0.2s;
         }
-        .tag:hover { background: #0288d1; color: white; }
+        .tag:hover { background: #0288d1; color: white; transform: translateY(-1px); }
 
-        table { width: 100%; border-collapse: collapse; background: white; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #f4f4f4; }
-        .no-result { color: #888; text-align: center; margin-top: 20px; }
+        /* 表格樣式 */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border-bottom: 1px solid #eee; padding: 14px; text-align: left; }
+        th { background-color: #fafafa; color: #666; font-weight: 600; text-transform: uppercase; font-size: 13px; }
+        tr:hover { background-color: #fcfcfc; }
+        .code-cell { font-family: "Courier New", monospace; font-weight: bold; color: #d81b60; }
+
+        .no-result { color: #999; text-align: center; margin-top: 30px; font-style: italic; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2>ICD-10 疾病代碼查詢</h2>
-    <input type="text" id="searchInput" placeholder="輸入後按 Enter 紀錄搜尋次數...">
+    
+    <div class="stats-info">
+        目前資料庫已錄入：<span id="totalCount">載入中...</span> 筆疾病代碼
+    </div>
+
+    <input type="text" id="searchInput" placeholder="搜尋代碼、中文或英文名稱... (按 Enter 紀錄熱門搜尋)">
 
     <div class="quick-search" id="quickSearch">
-        <label>熱門查詢 (超過5次)：</label>
+        <label>🔥 熱門查詢 (搜尋超過 5 次)：</label>
         <span id="hotTags"></span>
     </div>
 
@@ -53,84 +71,105 @@
         </thead>
         <tbody id="resultBody"></tbody>
     </table>
-    <div id="noResult" class="no-result" style="display: none;">找不到相符。</div>
+    <div id="noResult" class="no-result" style="display: none;">找不到相符的結果，請試試其他關鍵字。</div>
 </div>
 
 <script>
     let icdData = [];
     const THRESHOLD = 5; // 設定門檻為 5 次
 
-    // 1. 初始化資料與標籤顯示
-    fetch('icd10_codes_combined.json')
-        .then(response => response.json())
-        .then(data => {
-            icdData = data;
-            displayResults(icdData.slice(0, 10));
-            renderHotTags(); // 頁面載入時渲染常用標籤
-        });
-
     const searchInput = document.getElementById('searchInput');
     const hotTagsContainer = document.getElementById('hotTags');
+    const totalCountSpan = document.getElementById('totalCount');
+    const resultBody = document.getElementById('resultBody');
+    const noResult = document.getElementById('noResult');
 
-    // 2. 核心搜尋與計數邏輯
+    // 1. 初始化資料
+    fetch('icd10_codes_combined.json')
+        .then(response => {
+            if (!response.ok) throw new Error('無法載入 JSON 檔案');
+            return response.json();
+        })
+        .then(data => {
+            icdData = data;
+            
+            // 更新總筆數顯示 (使用千分位)
+            totalCountSpan.innerText = icdData.length.toLocaleString();
+            
+            // 預設顯示前 10 筆
+            displayResults(icdData.slice(0, 10));
+            renderHotTags();
+        })
+        .catch(err => {
+            console.error(err);
+            totalCountSpan.innerText = "讀取失敗";
+        });
+
+    // 2. 搜尋核心邏輯
     function performSearch(keyword) {
         const cleanKeyword = keyword.toLowerCase().trim();
 
-        // 渲染搜尋結果
-        const filtered = cleanKeyword === ''
-            ? icdData.slice(0, 10)
-            : icdData.filter(item =>
-                item.code.toLowerCase().includes(cleanKeyword) ||
-                item.en.toLowerCase().includes(cleanKeyword) ||
-                item.zh.includes(cleanKeyword)
-            );
+        if (cleanKeyword === '') {
+            displayResults(icdData.slice(0, 10));
+            return;
+        }
+
+        const filtered = icdData.filter(item =>
+            item.code.toLowerCase().includes(cleanKeyword) ||
+            item.en.toLowerCase().includes(cleanKeyword) ||
+            item.zh.includes(cleanKeyword)
+        );
+        
         displayResults(filtered);
     }
 
     // 3. 紀錄搜尋次數到 LocalStorage
     function recordSearch(keyword) {
         const val = keyword.trim();
-        if (val.length < 2) return; // 太短的詞不紀錄
+        if (val.length < 2) return; 
 
         let history = JSON.parse(localStorage.getItem('icdSearchHistory') || '{}');
         history[val] = (history[val] || 0) + 1;
         localStorage.setItem('icdSearchHistory', JSON.stringify(history));
 
-        renderHotTags(); // 更新顯示
+        renderHotTags(); 
     }
 
-    // 4. 渲染超過 5 次的標籤
+    // 4. 渲染熱門標籤
     function renderHotTags() {
         const history = JSON.parse(localStorage.getItem('icdSearchHistory') || '{}');
         hotTagsContainer.innerHTML = '';
 
-        Object.keys(history).forEach(word => {
-            if (history[word] >= THRESHOLD) {
-                const span = document.createElement('span');
-                span.className = 'tag';
-                span.innerText = word;
-                span.onclick = () => {
-                    searchInput.value = word;
-                    performSearch(word);
-                };
-                hotTagsContainer.appendChild(span);
-            }
+        const tags = Object.keys(history).filter(word => history[word] >= THRESHOLD);
+        
+        if (tags.length === 0) {
+            hotTagsContainer.innerHTML = '<span style="color:#ccc; font-size:12px;">暫無常用標籤</span>';
+            return;
+        }
+
+        tags.forEach(word => {
+            const span = document.createElement('span');
+            span.className = 'tag';
+            span.innerText = word;
+            span.onclick = () => {
+                searchInput.value = word;
+                performSearch(word);
+            };
+            hotTagsContainer.appendChild(span);
         });
     }
 
-    // 5. 監聽輸入
+    // 5. 監聽輸入與 Enter
     searchInput.addEventListener('input', (e) => performSearch(e.target.value));
 
-    // 當按下 Enter 鍵時，才正式計數（避免每打一個字就算一次）
     searchInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter' && e.target.value.trim() !== '') {
             recordSearch(e.target.value);
         }
     });
 
+    // 6. 渲染結果表格
     function displayResults(data) {
-        const resultBody = document.getElementById('resultBody');
-        const noResult = document.getElementById('noResult');
         resultBody.innerHTML = '';
 
         if (data.length === 0) {
@@ -141,7 +180,7 @@
         noResult.style.display = 'none';
         resultBody.innerHTML = data.map(item => `
             <tr>
-                <td><strong>${item.code}</strong></td>
+                <td class="code-cell">${item.code}</td>
                 <td>${item.en}</td>
                 <td>${item.zh}</td>
             </tr>
