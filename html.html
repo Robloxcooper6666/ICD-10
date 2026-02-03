@@ -5,43 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ICD-10 代碼查詢系統</title>
     <style>
+        /* 原有樣式保持不變 */
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 20px; line-height: 1.6; background-color: #f8f9fa; color: #333; }
         .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        
         h2 { margin-top: 0; color: #2c3e50; border-left: 5px solid #0288d1; padding-left: 15px; }
-        
-        /* 統計資訊樣式 */
         .stats-info { margin-bottom: 20px; font-size: 0.95em; color: #666; background: #f0f7ff; padding: 10px 15px; border-radius: 6px; border: 1px solid #d0e3f5; }
         .stats-info b { color: #0288d1; }
-
         input { width: 100%; padding: 14px; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; border: 2px solid #eee; border-radius: 8px; transition: border-color 0.3s; }
         input:focus { outline: none; border-color: #0288d1; }
-
-        /* 熱門查詢樣式 */
         .quick-search { margin-bottom: 25px; min-height: 35px; }
         .quick-search label { font-size: 14px; color: #777; margin-right: 10px; display: block; margin-bottom: 8px; }
-        .tag {
-            display: inline-block;
-            background: #e1f5fe;
-            color: #0288d1;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 13px;
-            cursor: pointer;
-            margin-right: 8px;
-            margin-bottom: 8px;
-            border: 1px solid #b3e5fc;
-            transition: all 0.2s;
-        }
+        .tag { display: inline-block; background: #e1f5fe; color: #0288d1; padding: 6px 14px; border-radius: 20px; font-size: 13px; cursor: pointer; margin-right: 8px; margin-bottom: 8px; border: 1px solid #b3e5fc; transition: all 0.2s; }
         .tag:hover { background: #0288d1; color: white; transform: translateY(-1px); }
 
-        /* 表格樣式 */
+        /* 新增：星星收藏按鈕樣式 */
+        .fav-btn { cursor: pointer; font-size: 20px; color: #ccc; transition: color 0.2s; user-select: none; }
+        .fav-btn.active { color: #ffca28; }
+        .fav-btn:hover { transform: scale(1.2); }
+
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { border-bottom: 1px solid #eee; padding: 14px; text-align: left; }
         th { background-color: #fafafa; color: #666; font-weight: 600; text-transform: uppercase; font-size: 13px; }
         tr:hover { background-color: #fcfcfc; }
         .code-cell { font-family: "Courier New", monospace; font-weight: bold; color: #d81b60; }
-
         .no-result { color: #999; text-align: center; margin-top: 30px; font-style: italic; }
     </style>
 </head>
@@ -64,9 +50,10 @@
     <table>
         <thead>
             <tr>
-                <th style="width: 20%;">代碼</th>
-                <th style="width: 40%;">英文名稱</th>
-                <th style="width: 40%;">中文名稱</th>
+                <th style="width: 10%;">收藏</th>
+                <th style="width: 15%;">代碼</th>
+                <th style="width: 37.5%;">英文名稱</th>
+                <th style="width: 37.5%;">中文名稱</th>
             </tr>
         </thead>
         <tbody id="resultBody"></tbody>
@@ -76,7 +63,8 @@
 
 <script>
     let icdData = [];
-    const THRESHOLD = 5; // 設定門檻為 5 次
+    let favorites = JSON.parse(localStorage.getItem('icdFavorites') || '[]');
+    const THRESHOLD = 5;
 
     const searchInput = document.getElementById('searchInput');
     const hotTagsContainer = document.getElementById('hotTags');
@@ -92,12 +80,8 @@
         })
         .then(data => {
             icdData = data;
-            
-            // 更新總筆數顯示 (使用千分位)
             totalCountSpan.innerText = icdData.length.toLocaleString();
-            
-            // 預設顯示前 10 筆
-            displayResults(icdData.slice(0, 10));
+            performSearch(''); // 初始顯示
             renderHotTags();
         })
         .catch(err => {
@@ -105,48 +89,62 @@
             totalCountSpan.innerText = "讀取失敗";
         });
 
-    // 2. 搜尋核心邏輯
+    // 2. 搜尋與排序核心邏輯
     function performSearch(keyword) {
         const cleanKeyword = keyword.toLowerCase().trim();
+        let filtered;
 
         if (cleanKeyword === '') {
-            displayResults(icdData.slice(0, 10));
-            return;
+            filtered = icdData.slice(0, 20); // 預設顯示前 20 筆
+        } else {
+            filtered = icdData.filter(item =>
+                item.code.toLowerCase().includes(cleanKeyword) ||
+                item.en.toLowerCase().includes(cleanKeyword) ||
+                item.zh.includes(cleanKeyword)
+            );
         }
 
-        const filtered = icdData.filter(item =>
-            item.code.toLowerCase().includes(cleanKeyword) ||
-            item.en.toLowerCase().includes(cleanKeyword) ||
-            item.zh.includes(cleanKeyword)
-        );
+        // 排序邏輯：收藏的排在前面
+        const sorted = filtered.sort((a, b) => {
+            const aFav = favorites.includes(a.code) ? 1 : 0;
+            const bFav = favorites.includes(b.code) ? 1 : 0;
+            return bFav - aFav; // 1 (收藏) 會排在 0 (未收藏) 前面
+        });
         
-        displayResults(filtered);
+        displayResults(sorted);
     }
 
-    // 3. 紀錄搜尋次數到 LocalStorage
+    // 3. 收藏切換功能
+    function toggleFavorite(code) {
+        const index = favorites.indexOf(code);
+        if (index > -1) {
+            favorites.splice(index, 1); // 移除收藏
+        } else {
+            favorites.push(code); // 加入收藏
+        }
+        localStorage.setItem('icdFavorites', JSON.stringify(favorites));
+        performSearch(searchInput.value); // 重新渲染當前列表
+    }
+
+    // 4. 紀錄熱門搜尋 (原有邏輯)
     function recordSearch(keyword) {
         const val = keyword.trim();
         if (val.length < 2) return; 
-
         let history = JSON.parse(localStorage.getItem('icdSearchHistory') || '{}');
         history[val] = (history[val] || 0) + 1;
         localStorage.setItem('icdSearchHistory', JSON.stringify(history));
-
         renderHotTags(); 
     }
 
-    // 4. 渲染熱門標籤
+    // 5. 渲染熱門標籤 (原有邏輯)
     function renderHotTags() {
         const history = JSON.parse(localStorage.getItem('icdSearchHistory') || '{}');
         hotTagsContainer.innerHTML = '';
-
         const tags = Object.keys(history).filter(word => history[word] >= THRESHOLD);
-        
         if (tags.length === 0) {
             hotTagsContainer.innerHTML = '<span style="color:#ccc; font-size:12px;">暫無常用標籤</span>';
             return;
         }
-
         tags.forEach(word => {
             const span = document.createElement('span');
             span.className = 'tag';
@@ -159,32 +157,39 @@
         });
     }
 
-    // 5. 監聽輸入與 Enter
+    // 監聽輸入
     searchInput.addEventListener('input', (e) => performSearch(e.target.value));
-
     searchInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter' && e.target.value.trim() !== '') {
             recordSearch(e.target.value);
         }
     });
 
-    // 6. 渲染結果表格
+    // 6. 渲染結果表格 (修改：增加星星按鈕)
     function displayResults(data) {
         resultBody.innerHTML = '';
-
         if (data.length === 0) {
             noResult.style.display = 'block';
             return;
         }
-
         noResult.style.display = 'none';
-        resultBody.innerHTML = data.map(item => `
-            <tr>
-                <td class="code-cell">${item.code}</td>
-                <td>${item.en}</td>
-                <td>${item.zh}</td>
-            </tr>
-        `).join('');
+
+        resultBody.innerHTML = data.map(item => {
+            const isFav = favorites.includes(item.code);
+            return `
+                <tr>
+                    <td>
+                        <span class="fav-btn ${isFav ? 'active' : ''}" 
+                              onclick="toggleFavorite('${item.code}')">
+                            ${isFav ? '★' : '☆'}
+                        </span>
+                    </td>
+                    <td class="code-cell">${item.code}</td>
+                    <td>${item.en}</td>
+                    <td>${item.zh}</td>
+                </tr>
+            `;
+        }).join('');
     }
 </script>
 
