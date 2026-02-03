@@ -3,49 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICD-10 專業查詢系統</title>
+    <title>ICD-10 高對比專業查詢系統</title>
     <style>
-        :root { --primary: #0288d1; --fav: #ffca28; --bg: #f4f7f9; }
-        body { font-family: system-ui, -apple-system, sans-serif; margin: 0; background-color: var(--bg); color: #333; }
-        
+        :root {
+            --bg-deep: #0f172a;       /* 深藍黑背景 */
+            --card-bg: #1e293b;      /* 卡片深灰色 */
+            --accent: #0ea5e9;       /* 亮藍色 */
+            --text-main: #f8fafc;    /* 近純白文字 */
+            --text-muted: #94a3b8;   /* 灰色文字 */
+            --highlight: #f472b6;    /* 螢光粉 (代碼用) */
+            --fav-star: #fbbf24;     /* 亮黃色星星 */
+            --danger: #ef4444;       /* 警告紅 */
+        }
+
+        body { 
+            font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+            margin: 0; 
+            background-color: var(--bg-deep); 
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+
         /* 佈局容器 */
-        .main-layout { display: flex; max-width: 1400px; margin: 20px auto; gap: 20px; padding: 0 20px; box-sizing: border-box; }
-        
+        .main-layout { 
+            display: flex; 
+            max-width: 1400px; 
+            margin: 30px auto; 
+            gap: 25px; 
+            padding: 0 20px; 
+        }
+
         /* 左側搜尋區 */
-        .search-section { flex: 2; background: white; padding: 25px; border-radius: 12px; shadow: 0 4px 12px rgba(0,0,0,0.08); min-width: 0; }
-        
+        .search-section { 
+            flex: 2; 
+            background: var(--card-bg); 
+            padding: 30px; 
+            border-radius: 16px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border: 1px solid #334155;
+        }
+
         /* 右側收藏區 */
-        .fav-section { flex: 1; background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e0e6ed; height: fit-content; position: sticky; top: 20px; min-width: 300px; }
-        
-        h2, h3 { margin-top: 0; color: #2c3e50; }
-        .stats-info { font-size: 0.85em; color: #666; margin-bottom: 15px; }
-        
-        input { width: 100%; padding: 12px; border: 2px solid #edf2f7; border-radius: 8px; font-size: 16px; margin-bottom: 10px; }
-        input:focus { outline: none; border-color: var(--primary); }
+        .fav-section { 
+            flex: 1; 
+            background: #111827; 
+            padding: 25px; 
+            border-radius: 16px; 
+            border: 2px solid var(--accent);
+            height: fit-content; 
+            position: sticky; 
+            top: 20px; 
+            min-width: 320px;
+        }
 
-        .tag { display: inline-block; background: #e1f5fe; color: var(--primary); padding: 4px 12px; border-radius: 15px; font-size: 12px; cursor: pointer; margin: 0 5px 5px 0; border: 1px solid #b3e5fc; }
+        h2 { color: var(--accent); margin-top: 0; font-size: 24px; letter-spacing: 1px; }
+        h3 { color: var(--fav-star); margin-top: 0; display: flex; align-items: center; gap: 8px; }
 
-        /* 表格優化 */
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        th { text-align: left; padding: 12px; border-bottom: 2px solid #f0f0f0; color: #888; }
-        td { padding: 12px; border-bottom: 1px solid #f8f8f8; }
-        .code-cell { font-family: monospace; font-weight: bold; color: #d81b60; }
+        .stats-info { 
+            background: rgba(14, 165, 233, 0.1);
+            color: var(--accent);
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--accent);
+        }
+
+        /* 輸入框強化 */
+        input { 
+            width: 100%; 
+            padding: 15px; 
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 10px; 
+            font-size: 18px; 
+            color: white;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        input:focus { 
+            outline: none; 
+            border-color: var(--accent); 
+            box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
+        }
+
+        /* 表格反差樣式 */
+        table { width: 100%; border-collapse: collapse; }
+        th { 
+            text-align: left; 
+            padding: 15px; 
+            border-bottom: 2px solid #334155; 
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+        td { padding: 18px 15px; border-bottom: 1px solid #334155; }
         
+        tr:hover { background: rgba(255,255,255,0.03); }
+
+        .code-cell { 
+            font-family: 'JetBrains Mono', 'Courier New', monospace; 
+            font-weight: 800; 
+            color: var(--highlight);
+            font-size: 1.1em;
+        }
+
+        .zh-name { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+        .en-name { font-size: 13px; color: var(--text-muted); font-style: italic; }
+
         /* 星星按鈕 */
-        .star { cursor: pointer; font-size: 18px; color: #ddd; transition: 0.2s; }
-        .star.active { color: var(--fav); }
-        
-        /* 收藏列表項目 */
-        .fav-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
-        .fav-item:hover { background: #fffcf0; }
-        .fav-item-info { flex: 1; }
-        .fav-item-code { font-weight: bold; color: #d81b60; margin-right: 8px; }
-        .remove-fav { color: #ccc; cursor: pointer; margin-left: 10px; }
-        .remove-fav:hover { color: #ff5252; }
+        .star { 
+            cursor: pointer; 
+            font-size: 24px; 
+            color: #334155; 
+            transition: transform 0.2s;
+            display: inline-block;
+        }
+        .star.active { color: var(--fav-star); filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.5)); }
+        .star:hover { transform: scale(1.2); }
 
-        @media (max-width: 900px) {
+        /* 收藏列表項目 */
+        .fav-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 15px; 
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--fav-star);
+        }
+        .fav-item-info { flex: 1; }
+        .fav-item-code { font-weight: bold; color: var(--highlight); margin-right: 10px; }
+        .remove-fav { color: #475569; cursor: pointer; font-size: 18px; }
+        .remove-fav:hover { color: var(--danger); }
+
+        /* 響應式 */
+        @media (max-width: 1000px) {
             .main-layout { flex-direction: column; }
-            .fav-section { position: static; order: -1; }
+            .fav-section { position: static; order: -1; min-width: auto; }
         }
     </style>
 </head>
@@ -53,40 +150,38 @@
 
 <div class="main-layout">
     <div class="search-section">
-        <h2>ICD-10 搜尋</h2>
-        <div class="stats-info">資料庫筆數：<span id="totalCount">...</span></div>
+        <h2>ICD-10 診斷代碼核心</h2>
+        <div class="stats-info">SYSTEM READY: <span id="totalCount">...</span> CODES LOADED</div>
         
-        <input type="text" id="searchInput" placeholder="輸入代碼或關鍵字...">
+        <input type="text" id="searchInput" placeholder="搜尋代碼、疾病名稱 (中英文)...">
         
-        <div id="hotTags" style="margin-bottom: 15px;"></div>
-
         <table>
             <thead>
                 <tr>
-                    <th width="40">★</th>
-                    <th width="80">代碼</th>
-                    <th>名稱</th>
+                    <th width="50">收藏</th>
+                    <th width="100">代碼</th>
+                    <th>診斷名稱 (中/英)</th>
                 </tr>
             </thead>
             <tbody id="resultBody"></tbody>
         </table>
-        <div id="noResult" style="display:none; text-align:center; padding:20px; color:#999;">無搜尋結果</div>
+        <div id="noResult" style="display:none; text-align:center; padding:40px; color:var(--text-muted);">未找到匹配的診斷數據</div>
     </div>
 
     <div class="fav-section">
-        <h3>⭐ 我的最愛</h3>
+        <h3>⭐ 已釘選收藏</h3>
         <div id="favList">
-            <div style="color:#ccc; font-size:13px;">尚未收藏任何代碼</div>
+            <div style="color:var(--text-muted); font-size:14px; text-align:center; padding:20px;">尚無釘選項目</div>
         </div>
     </div>
 </div>
 
 <script>
     let icdData = [];
-    let favorites = JSON.parse(localStorage.getItem('icdFav_v2') || '[]');
+    let favorites = JSON.parse(localStorage.getItem('icdFav_v3') || '[]');
     let searchTimer;
 
-    // 1. 載入資料
+    // 1. 初始化資料
     fetch('icd10_codes_combined.json')
         .then(res => res.json())
         .then(data => {
@@ -96,11 +191,11 @@
             performSearch('');
         });
 
-    // 2. 搜尋邏輯 (效能優化：僅顯示前 50 筆)
+    // 2. 搜尋與渲染
     function performSearch(q) {
         const query = q.toLowerCase().trim();
         const results = query === '' 
-            ? icdData.slice(0, 15) 
+            ? icdData.slice(0, 12) 
             : icdData.filter(item => 
                 item.code.toLowerCase().includes(query) || 
                 item.en.toLowerCase().includes(query) || 
@@ -110,7 +205,6 @@
         renderTable(results);
     }
 
-    // 3. 渲染主表格
     function renderTable(data) {
         const tbody = document.getElementById('resultBody');
         const noRes = document.getElementById('noResult');
@@ -126,37 +220,36 @@
             const isFav = favorites.some(f => f.code === item.code);
             return `
                 <tr>
-                    <td><span class="star ${isFav?'active':''}" onclick="toggleFav('${item.code}')">${isFav?'★':'☆'}</span></td>
+                    <td><span class="star ${isFav?'active':''}" onclick="toggleFav('${item.code}')">★</span></td>
                     <td class="code-cell">${item.code}</td>
                     <td>
-                        <div style="font-weight:500">${item.zh}</div>
-                        <div style="font-size:12px; color:#888">${item.en}</div>
+                        <div class="zh-name">${item.zh}</div>
+                        <div class="en-name">${item.en}</div>
                     </td>
                 </tr>
             `;
         }).join('');
     }
 
-    // 4. 收藏邏輯
+    // 3. 收藏邏輯
     function toggleFav(code) {
         const index = favorites.findIndex(f => f.code === code);
         if (index > -1) {
             favorites.splice(index, 1);
         } else {
             const item = icdData.find(i => i.code === code);
-            if (item) favorites.unshift(item); // 新收藏的放最上面
+            if (item) favorites.unshift(item);
         }
         
-        localStorage.setItem('icdFav_v2', JSON.stringify(favorites));
+        localStorage.setItem('icdFav_v3', JSON.stringify(favorites));
         renderFavorites();
         performSearch(document.getElementById('searchInput').value);
     }
 
-    // 5. 渲染右側收藏欄
     function renderFavorites() {
         const container = document.getElementById('favList');
         if (favorites.length === 0) {
-            container.innerHTML = '<div style="color:#ccc; font-size:13px;">尚未收藏任何代碼</div>';
+            container.innerHTML = '<div style="color:var(--text-muted); font-size:14px; text-align:center; padding:20px;">尚無釘選項目</div>';
             return;
         }
 
@@ -164,19 +257,17 @@
             <div class="fav-item">
                 <div class="fav-item-info">
                     <span class="fav-item-code">${item.code}</span>
-                    <span>${item.zh}</span>
+                    <div style="font-size:13px; margin-top:3px;">${item.zh}</div>
                 </div>
                 <span class="remove-fav" onclick="toggleFav('${item.code}')">✕</span>
             </div>
         `).join('');
     }
 
-    // 6. 輸入防抖 (Debounce) 減少運算負擔
+    // 4. 防抖
     document.getElementById('searchInput').addEventListener('input', (e) => {
         clearTimeout(searchTimer);
-        searchTimer = setTimeout(() => {
-            performSearch(e.target.value);
-        }, 200); // 停止輸入 0.2 秒後才執行搜尋
+        searchTimer = setTimeout(() => performSearch(e.target.value), 200);
     });
 </script>
 
