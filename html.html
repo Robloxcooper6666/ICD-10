@@ -3,273 +3,278 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICD-10 疾病查詢系統</title>
+    <title>ICD-10 Neural Interface</title>
     <style>
         :root {
-            --bg-deep: #0f172a;       /* 深藍黑背景 */
-            --card-bg: #1e293b;      /* 卡片深灰色 */
-            --accent: #0ea5e9;       /* 亮藍色 */
-            --text-main: #f8fafc;    /* 近純白文字 */
-            --text-muted: #94a3b8;   /* 灰色文字 */
-            --highlight: #f472b6;    /* 螢光粉 (代碼用) */
-            --fav-star: #fbbf24;     /* 亮黃色星星 */
-            --danger: #ef4444;       /* 警告紅 */
+            --bg-main: #f0f4f8;
+            --panel-bg: rgba(255, 255, 255, 0.7);
+            --accent-cyan: #00d2ff;
+            --accent-blue: #0045ff;
+            --text-dark: #1a202c;
+            --tech-pink: #ff007a;
+            --border-glow: rgba(0, 210, 255, 0.3);
         }
 
         body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
-            background-color: var(--bg-deep);
-            color: var(--text-main);
-            line-height: 1.5;
+            background: var(--bg-main);
+            color: var(--text-dark);
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 2px 2px, rgba(0,0,0,0.05) 1px, transparent 0);
+            background-size: 40px 40px;
         }
 
-        /* 佈局容器 */
+        /* 背景動態 Canvas */
+        #bgCanvas {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            opacity: 0.4;
+        }
+
         .main-layout {
-            display: flex;
-            max-width: 1400px;
-            margin: 30px auto;
-            gap: 25px;
-            padding: 0 20px;
+            display: flex; max-width: 1400px; margin: 40px auto; gap: 30px; padding: 0 25px;
+            position: relative;
         }
 
-        /* 左側搜尋區 */
-        .search-section {
-            flex: 2;
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            border: 1px solid #334155;
+        /* 玻璃擬態面板 */
+        .glass-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+            position: relative;
+            overflow: hidden;
         }
 
-        /* 右側收藏區 */
-        .fav-section {
-            flex: 1;
-            background: #111827;
-            padding: 25px;
-            border-radius: 16px;
-            border: 2px solid var(--accent);
-            height: fit-content;
-            position: sticky;
-            top: 20px;
-            min-width: 320px;
+        .glass-panel::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
         }
 
-        h2 { color: var(--accent); margin-top: 0; font-size: 24px; letter-spacing: 1px; }
-        h3 { color: var(--fav-star); margin-top: 0; display: flex; align-items: center; gap: 8px; }
+        .search-section { flex: 2; padding: 40px; }
+        .side-bar { flex: 1; display: flex; flex-direction: column; gap: 25px; min-width: 350px; }
 
-        .stats-info {
-            background: rgba(14, 165, 233, 0.1);
-            color: var(--accent);
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-size: 0.9em;
-            margin-bottom: 20px;
-            border-left: 4px solid var(--accent);
+        /* 標題與裝飾 */
+        h2 {
+            margin-top: 0; letter-spacing: 2px; text-transform: uppercase;
+            font-size: 28px; background: linear-gradient(45deg, var(--accent-blue), var(--tech-pink));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
 
-        /* 輸入框強化 */
+        .stats-tag {
+            display: inline-block; padding: 4px 12px; background: #000; color: var(--accent-cyan);
+            font-family: monospace; font-size: 12px; border-radius: 4px; margin-bottom: 20px;
+        }
+
+        /* 輸入框科技感 */
+        .input-group { position: relative; margin-bottom: 30px; }
         input {
-            width: 100%;
-            padding: 15px;
-            background: #0f172a;
-            border: 2px solid #334155;
-            border-radius: 10px;
-            font-size: 18px;
-            color: white;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
+            width: 100%; padding: 18px 25px; border: 2px solid #e2e8f0; border-radius: 12px;
+            background: rgba(255,255,255,0.5); font-size: 18px; color: var(--text-dark);
+            transition: all 0.3s; box-sizing: border-box;
         }
         input:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
+            outline: none; border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
         }
 
-        /* 表格反差樣式 */
-        table { width: 100%; border-collapse: collapse; }
-        th {
-            text-align: left;
-            padding: 15px;
-            border-bottom: 2px solid #334155;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            font-size: 12px;
-            letter-spacing: 1px;
-        }
-        td { padding: 18px 15px; border-bottom: 1px solid #334155; }
+        /* 表格優化 */
+        table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+        th { text-align: left; padding: 10px 20px; color: var(--text-dark); font-weight: 800; font-size: 12px; text-transform: uppercase; }
+        td { background: white; padding: 20px; transition: transform 0.2s; border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; }
+        td:first-child { border-left: 1px solid #f0f0f0; border-radius: 12px 0 0 12px; }
+        td:last-child { border-right: 1px solid #f0f0f0; border-radius: 0 12px 12px 0; }
+        tr:hover td { transform: scale(1.01); box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; }
 
-        tr:hover { background: rgba(255,255,255,0.03); }
-
-        .code-cell {
-            font-family: 'JetBrains Mono', 'Courier New', monospace;
-            font-weight: 800;
-            color: var(--highlight);
-            font-size: 1.1em;
+        .code-pill {
+            background: #f0f7ff; color: var(--accent-blue); padding: 5px 10px;
+            border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-weight: 900;
         }
 
-        .zh-name { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 4px; }
-        .en-name { font-size: 13px; color: var(--text-muted); font-style: italic; }
+        /* Canvas 數據可視化區 */
+        .chart-box { padding: 20px; }
+        #dataChart { width: 100%; height: 250px; filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.3)); }
 
-        /* 星星按鈕 */
-        .star {
-            cursor: pointer;
-            font-size: 24px;
-            color: #334155;
-            transition: transform 0.2s;
-            display: inline-block;
-        }
-        .star.active { color: var(--fav-star); filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.5)); }
-        .star:hover { transform: scale(1.2); }
-
-        /* 收藏列表項目 */
         .fav-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 8px;
-            margin-bottom: 10px;
-            border-left: 3px solid var(--fav-star);
+            background: white; margin-bottom: 10px; padding: 15px; border-radius: 10px;
+            border-left: 5px solid var(--tech-pink); display: flex; justify-content: space-between;
         }
-        .fav-item-info { flex: 1; }
-        .fav-item-code { font-weight: bold; color: var(--highlight); margin-right: 10px; }
-        .remove-fav { color: #475569; cursor: pointer; font-size: 18px; }
-        .remove-fav:hover { color: var(--danger); }
 
-        /* 響應式 */
-        @media (max-width: 1000px) {
-            .main-layout { flex-direction: column; }
-            .fav-section { position: static; order: -1; min-width: auto; }
-        }
+        /* 滾動條科技感 */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-main); }
+        ::-webkit-scrollbar-thumb { background: var(--accent-cyan); border-radius: 10px; }
+
     </style>
 </head>
 <body>
 
-<div class="main-layout">
-    <div class="search-section">
-        <h2>ICD-10 診斷代碼核心</h2>
-        <div class="stats-info">SYSTEM READY: <span id="totalCount">...</span> CODES LOADED</div>
+<canvas id="bgCanvas"></canvas>
 
-        <input type="text" id="searchInput" placeholder="搜尋代碼、疾病名稱 (中英文)...">
+<div class="main-layout">
+    <div class="glass-panel search-section">
+        <div class="stats-tag">STATUS: OPERATIONAL // DATA_LOADED: <span id="count">0</span></div>
+        <h2>Diagnostic Nexus</h2>
+
+        <div class="input-group">
+            <input type="text" id="searchInput" placeholder="Initialize Search Sequence...">
+        </div>
 
         <table>
             <thead>
-                <tr>
-                    <th width="50">收藏</th>
-                    <th width="100">代碼</th>
-                    <th>診斷名稱 (中/英)</th>
-                </tr>
+                <tr><th width="80">Fav</th><th width="120">ID_CODE</th><th>NOMENCLATURE</th></tr>
             </thead>
             <tbody id="resultBody"></tbody>
         </table>
-        <div id="noResult" style="display:none; text-align:center; padding:40px; color:var(--text-muted);">未找到匹配的診斷數據</div>
     </div>
 
-    <div class="fav-section">
-        <h3>⭐ 已釘選收藏</h3>
-        <div id="favList">
-            <div style="color:var(--text-muted); font-size:14px; text-align:center; padding:20px;">尚無釘選項目</div>
+    <div class="side-bar">
+        <div class="glass-panel chart-box">
+            <h3 style="font-size: 14px; color: var(--accent-blue);">比例</h3>
+            <canvas id="dataChart"></canvas>
+        </div>
+
+        <div class="glass-panel chart-box" style="flex-grow: 1;">
+            <h3 style="font-size: 14px; color: var(--tech-pink);">喜愛項目</h3>
+            <div id="favList"></div>
         </div>
     </div>
 </div>
 
 <script>
-    let icdData = [];
-    let favorites = JSON.parse(localStorage.getItem('icdFav_v3') || '[]');
-    let searchTimer;
+    const bgCanvas = document.getElementById('bgCanvas');
+    const bgCtx = bgCanvas.getContext('2d');
+    const dataCanvas = document.getElementById('dataChart');
+    const dataCtx = dataCanvas.getContext('2d');
 
-    // 1. 初始化資料
+    let icdData = [];
+    let favorites = JSON.parse(localStorage.getItem('icdFav_v4') || '[]');
+
+    // 1. 背景科技感動畫 (網格粒子)
+    function initBg() {
+        bgCanvas.width = window.innerWidth;
+        bgCanvas.height = window.innerHeight;
+        const particles = [];
+        for(let i=0; i<50; i++) particles.push({x: Math.random()*bgCanvas.width, y: Math.random()*bgCanvas.height, s: Math.random()*2});
+
+        function animate() {
+            bgCtx.clearRect(0,0,bgCanvas.width, bgCanvas.height);
+            bgCtx.fillStyle = 'rgba(0, 210, 255, 0.3)';
+            particles.forEach(p => {
+                p.y -= p.s;
+                if(p.y < 0) p.y = bgCanvas.height;
+                bgCtx.beginPath();
+                bgCtx.arc(p.x, p.y, p.s, 0, Math.PI*2);
+                bgCtx.fill();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+    }
+
+    // 2. 數據處理與繪圖
+    function drawTechChart(data) {
+        dataCanvas.width = dataCanvas.offsetWidth * 2;
+        dataCanvas.height = dataCanvas.offsetHeight * 2;
+        dataCtx.scale(2, 2);
+
+        const stats = {};
+        data.slice(0, 30).forEach(item => {
+            const char = item.code[0];
+            stats[char] = (stats[char] || 0) + 1;
+        });
+
+        const keys = Object.keys(stats);
+        const maxVal = Math.max(...Object.values(stats));
+
+        dataCtx.clearRect(0,0, 400, 400);
+        keys.forEach((key, i) => {
+            const h = (stats[key] / maxVal) * 150;
+            const x = 40 + (i * 45);
+
+            // 科技感長條
+            let grad = dataCtx.createLinearGradient(0, 200, 0, 200-h);
+            grad.addColorStop(0, 'rgba(0, 210, 255, 0.8)');
+            grad.addColorStop(1, 'rgba(0, 69, 255, 1)');
+
+            dataCtx.fillStyle = grad;
+            dataCtx.fillRect(x, 200 - h, 25, h);
+
+            // 底部文字
+            dataCtx.fillStyle = '#1a202c';
+            dataCtx.font = 'bold 10px monospace';
+            dataCtx.fillText(key, x + 8, 215);
+        });
+    }
+
+    // 3. 核心功能
     fetch('icd10_codes_combined.json')
         .then(res => res.json())
         .then(data => {
             icdData = data;
-            document.getElementById('totalCount').innerText = data.length.toLocaleString();
-            renderFavorites();
+            document.getElementById('count').innerText = data.length;
+            performSearch('');
+        })
+        .catch(() => {
+            // Mock data if file missing
+            icdData = [{code:"A01.0", zh:"傷寒", en:"Typhoid fever"}, {code:"E11.9", zh:"糖尿病", en:"Diabetes"}, {code:"I10", zh:"高血壓", en:"HTN"}];
             performSearch('');
         });
 
-    // 2. 搜尋與渲染
     function performSearch(q) {
-        const query = q.toLowerCase().trim();
-        const results = query === ''
-            ? icdData.slice(0, 12)
-            : icdData.filter(item =>
-                item.code.toLowerCase().includes(query) ||
-                item.en.toLowerCase().includes(query) ||
-                item.zh.includes(query)
-              ).slice(0, 50);
+        const query = q.toLowerCase();
+        const results = icdData.filter(item =>
+            item.code.toLowerCase().includes(query) ||
+            item.zh.includes(query) ||
+            item.en.toLowerCase().includes(query)
+        ).slice(0, 15);
 
-        renderTable(results);
-    }
-
-    function renderTable(data) {
         const tbody = document.getElementById('resultBody');
-        const noRes = document.getElementById('noResult');
-
-        if (data.length === 0) {
-            tbody.innerHTML = '';
-            noRes.style.display = 'block';
-            return;
-        }
-
-        noRes.style.display = 'none';
-        tbody.innerHTML = data.map(item => {
+        tbody.innerHTML = results.map(item => {
             const isFav = favorites.some(f => f.code === item.code);
             return `
                 <tr>
-                    <td><span class="star ${isFav?'active':''}" onclick="toggleFav('${item.code}')">★</span></td>
-                    <td class="code-cell">${item.code}</td>
+                    <td><span style="color:${isFav?'var(--tech-pink)':'#ccc'}" onclick="toggleFav('${item.code}')">✦</span></td>
+                    <td><span class="code-pill">${item.code}</span></td>
                     <td>
-                        <div class="zh-name">${item.zh}</div>
-                        <div class="en-name">${item.en}</div>
+                        <div style="font-weight:800; color:var(--text-dark)">${item.zh}</div>
+                        <div style="font-size:11px; color:var(--text-muted); font-family:monospace;">${item.en}</div>
                     </td>
                 </tr>
             `;
         }).join('');
+        drawTechChart(results);
+        renderFavs();
     }
 
-    // 3. 收藏邏輯
     function toggleFav(code) {
-        const index = favorites.findIndex(f => f.code === code);
-        if (index > -1) {
-            favorites.splice(index, 1);
-        } else {
-            const item = icdData.find(i => i.code === code);
-            if (item) favorites.unshift(item);
-        }
-
-        localStorage.setItem('icdFav_v3', JSON.stringify(favorites));
-        renderFavorites();
+        const idx = favorites.findIndex(f => f.code === code);
+        if(idx > -1) favorites.splice(idx, 1);
+        else favorites.unshift(icdData.find(i => i.code === code));
+        localStorage.setItem('icdFav_v4', JSON.stringify(favorites));
         performSearch(document.getElementById('searchInput').value);
     }
 
-    function renderFavorites() {
-        const container = document.getElementById('favList');
-        if (favorites.length === 0) {
-            container.innerHTML = '<div style="color:var(--text-muted); font-size:14px; text-align:center; padding:20px;">尚無釘選項目</div>';
-            return;
-        }
-
-        container.innerHTML = favorites.map(item => `
+    function renderFavs() {
+        const list = document.getElementById('favList');
+        list.innerHTML = favorites.map(f => `
             <div class="fav-item">
-                <div class="fav-item-info">
-                    <span class="fav-item-code">${item.code}</span>
-                    <div style="font-size:13px; margin-top:3px;">${item.zh}</div>
-                </div>
-                <span class="remove-fav" onclick="toggleFav('${item.code}')">✕</span>
+                <span style="font-size:13px;"><b>${f.code}</b> ${f.zh}</span>
+                <span onclick="toggleFav('${f.code}')" style="cursor:pointer">×</span>
             </div>
         `).join('');
     }
 
-    // 4. 防抖
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-        clearTimeout(searchTimer);
-        searchTimer = setTimeout(() => performSearch(e.target.value), 200);
-    });
-</script>
+    document.getElementById('searchInput').addEventListener('input', (e) => performSearch(e.target.value));
+    window.addEventListener('resize', initBg);
+    initBg();
 
+</script>
 </body>
 </html>
