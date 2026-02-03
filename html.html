@@ -3,194 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICD-10 代碼查詢系統</title>
+    <title>ICD-10 專業查詢系統</title>
     <style>
-        /* 原有樣式保持不變 */
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 20px; line-height: 1.6; background-color: #f8f9fa; color: #333; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        h2 { margin-top: 0; color: #2c3e50; border-left: 5px solid #0288d1; padding-left: 15px; }
-        .stats-info { margin-bottom: 20px; font-size: 0.95em; color: #666; background: #f0f7ff; padding: 10px 15px; border-radius: 6px; border: 1px solid #d0e3f5; }
-        .stats-info b { color: #0288d1; }
-        input { width: 100%; padding: 14px; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; border: 2px solid #eee; border-radius: 8px; transition: border-color 0.3s; }
-        input:focus { outline: none; border-color: #0288d1; }
-        .quick-search { margin-bottom: 25px; min-height: 35px; }
-        .quick-search label { font-size: 14px; color: #777; margin-right: 10px; display: block; margin-bottom: 8px; }
-        .tag { display: inline-block; background: #e1f5fe; color: #0288d1; padding: 6px 14px; border-radius: 20px; font-size: 13px; cursor: pointer; margin-right: 8px; margin-bottom: 8px; border: 1px solid #b3e5fc; transition: all 0.2s; }
-        .tag:hover { background: #0288d1; color: white; transform: translateY(-1px); }
+        :root { --primary: #0288d1; --fav: #ffca28; --bg: #f4f7f9; }
+        body { font-family: system-ui, -apple-system, sans-serif; margin: 0; background-color: var(--bg); color: #333; }
+        
+        /* 佈局容器 */
+        .main-layout { display: flex; max-width: 1400px; margin: 20px auto; gap: 20px; padding: 0 20px; box-sizing: border-box; }
+        
+        /* 左側搜尋區 */
+        .search-section { flex: 2; background: white; padding: 25px; border-radius: 12px; shadow: 0 4px 12px rgba(0,0,0,0.08); min-width: 0; }
+        
+        /* 右側收藏區 */
+        .fav-section { flex: 1; background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e0e6ed; height: fit-content; position: sticky; top: 20px; min-width: 300px; }
+        
+        h2, h3 { margin-top: 0; color: #2c3e50; }
+        .stats-info { font-size: 0.85em; color: #666; margin-bottom: 15px; }
+        
+        input { width: 100%; padding: 12px; border: 2px solid #edf2f7; border-radius: 8px; font-size: 16px; margin-bottom: 10px; }
+        input:focus { outline: none; border-color: var(--primary); }
 
-        /* 新增：星星收藏按鈕樣式 */
-        .fav-btn { cursor: pointer; font-size: 20px; color: #ccc; transition: color 0.2s; user-select: none; }
-        .fav-btn.active { color: #ffca28; }
-        .fav-btn:hover { transform: scale(1.2); }
+        .tag { display: inline-block; background: #e1f5fe; color: var(--primary); padding: 4px 12px; border-radius: 15px; font-size: 12px; cursor: pointer; margin: 0 5px 5px 0; border: 1px solid #b3e5fc; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border-bottom: 1px solid #eee; padding: 14px; text-align: left; }
-        th { background-color: #fafafa; color: #666; font-weight: 600; text-transform: uppercase; font-size: 13px; }
-        tr:hover { background-color: #fcfcfc; }
-        .code-cell { font-family: "Courier New", monospace; font-weight: bold; color: #d81b60; }
-        .no-result { color: #999; text-align: center; margin-top: 30px; font-style: italic; }
+        /* 表格優化 */
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { text-align: left; padding: 12px; border-bottom: 2px solid #f0f0f0; color: #888; }
+        td { padding: 12px; border-bottom: 1px solid #f8f8f8; }
+        .code-cell { font-family: monospace; font-weight: bold; color: #d81b60; }
+        
+        /* 星星按鈕 */
+        .star { cursor: pointer; font-size: 18px; color: #ddd; transition: 0.2s; }
+        .star.active { color: var(--fav); }
+        
+        /* 收藏列表項目 */
+        .fav-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+        .fav-item:hover { background: #fffcf0; }
+        .fav-item-info { flex: 1; }
+        .fav-item-code { font-weight: bold; color: #d81b60; margin-right: 8px; }
+        .remove-fav { color: #ccc; cursor: pointer; margin-left: 10px; }
+        .remove-fav:hover { color: #ff5252; }
+
+        @media (max-width: 900px) {
+            .main-layout { flex-direction: column; }
+            .fav-section { position: static; order: -1; }
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>ICD-10 疾病代碼查詢</h2>
-    
-    <div class="stats-info">
-        目前資料庫已錄入：<span id="totalCount">載入中...</span> 筆疾病代碼
+<div class="main-layout">
+    <div class="search-section">
+        <h2>ICD-10 搜尋</h2>
+        <div class="stats-info">資料庫筆數：<span id="totalCount">...</span></div>
+        
+        <input type="text" id="searchInput" placeholder="輸入代碼或關鍵字...">
+        
+        <div id="hotTags" style="margin-bottom: 15px;"></div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th width="40">★</th>
+                    <th width="80">代碼</th>
+                    <th>名稱</th>
+                </tr>
+            </thead>
+            <tbody id="resultBody"></tbody>
+        </table>
+        <div id="noResult" style="display:none; text-align:center; padding:20px; color:#999;">無搜尋結果</div>
     </div>
 
-    <input type="text" id="searchInput" placeholder="搜尋代碼、中文或英文名稱... (按 Enter 紀錄熱門搜尋)">
-
-    <div class="quick-search" id="quickSearch">
-        <label>🔥 熱門查詢 (搜尋超過 5 次)：</label>
-        <span id="hotTags"></span>
+    <div class="fav-section">
+        <h3>⭐ 我的最愛</h3>
+        <div id="favList">
+            <div style="color:#ccc; font-size:13px;">尚未收藏任何代碼</div>
+        </div>
     </div>
-
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 10%;">收藏</th>
-                <th style="width: 15%;">代碼</th>
-                <th style="width: 37.5%;">英文名稱</th>
-                <th style="width: 37.5%;">中文名稱</th>
-            </tr>
-        </thead>
-        <tbody id="resultBody"></tbody>
-    </table>
-    <div id="noResult" class="no-result" style="display: none;">找不到相符的結果，請試試其他關鍵字。</div>
 </div>
 
 <script>
     let icdData = [];
-    let favorites = JSON.parse(localStorage.getItem('icdFavorites') || '[]');
-    const THRESHOLD = 5;
+    let favorites = JSON.parse(localStorage.getItem('icdFav_v2') || '[]');
+    let searchTimer;
 
-    const searchInput = document.getElementById('searchInput');
-    const hotTagsContainer = document.getElementById('hotTags');
-    const totalCountSpan = document.getElementById('totalCount');
-    const resultBody = document.getElementById('resultBody');
-    const noResult = document.getElementById('noResult');
-
-    // 1. 初始化資料
+    // 1. 載入資料
     fetch('icd10_codes_combined.json')
-        .then(response => {
-            if (!response.ok) throw new Error('無法載入 JSON 檔案');
-            return response.json();
-        })
+        .then(res => res.json())
         .then(data => {
             icdData = data;
-            totalCountSpan.innerText = icdData.length.toLocaleString();
-            performSearch(''); // 初始顯示
-            renderHotTags();
-        })
-        .catch(err => {
-            console.error(err);
-            totalCountSpan.innerText = "讀取失敗";
+            document.getElementById('totalCount').innerText = data.length.toLocaleString();
+            renderFavorites();
+            performSearch('');
         });
 
-    // 2. 搜尋與排序核心邏輯
-    function performSearch(keyword) {
-        const cleanKeyword = keyword.toLowerCase().trim();
-        let filtered;
+    // 2. 搜尋邏輯 (效能優化：僅顯示前 50 筆)
+    function performSearch(q) {
+        const query = q.toLowerCase().trim();
+        const results = query === '' 
+            ? icdData.slice(0, 15) 
+            : icdData.filter(item => 
+                item.code.toLowerCase().includes(query) || 
+                item.en.toLowerCase().includes(query) || 
+                item.zh.includes(query)
+              ).slice(0, 50);
 
-        if (cleanKeyword === '') {
-            filtered = icdData.slice(0, 20); // 預設顯示前 20 筆
-        } else {
-            filtered = icdData.filter(item =>
-                item.code.toLowerCase().includes(cleanKeyword) ||
-                item.en.toLowerCase().includes(cleanKeyword) ||
-                item.zh.includes(cleanKeyword)
-            );
-        }
+        renderTable(results);
+    }
 
-        // 排序邏輯：收藏的排在前面
-        const sorted = filtered.sort((a, b) => {
-            const aFav = favorites.includes(a.code) ? 1 : 0;
-            const bFav = favorites.includes(b.code) ? 1 : 0;
-            return bFav - aFav; // 1 (收藏) 會排在 0 (未收藏) 前面
-        });
+    // 3. 渲染主表格
+    function renderTable(data) {
+        const tbody = document.getElementById('resultBody');
+        const noRes = document.getElementById('noResult');
         
-        displayResults(sorted);
-    }
-
-    // 3. 收藏切換功能
-    function toggleFavorite(code) {
-        const index = favorites.indexOf(code);
-        if (index > -1) {
-            favorites.splice(index, 1); // 移除收藏
-        } else {
-            favorites.push(code); // 加入收藏
-        }
-        localStorage.setItem('icdFavorites', JSON.stringify(favorites));
-        performSearch(searchInput.value); // 重新渲染當前列表
-    }
-
-    // 4. 紀錄熱門搜尋 (原有邏輯)
-    function recordSearch(keyword) {
-        const val = keyword.trim();
-        if (val.length < 2) return; 
-        let history = JSON.parse(localStorage.getItem('icdSearchHistory') || '{}');
-        history[val] = (history[val] || 0) + 1;
-        localStorage.setItem('icdSearchHistory', JSON.stringify(history));
-        renderHotTags(); 
-    }
-
-    // 5. 渲染熱門標籤 (原有邏輯)
-    function renderHotTags() {
-        const history = JSON.parse(localStorage.getItem('icdSearchHistory') || '{}');
-        hotTagsContainer.innerHTML = '';
-        const tags = Object.keys(history).filter(word => history[word] >= THRESHOLD);
-        if (tags.length === 0) {
-            hotTagsContainer.innerHTML = '<span style="color:#ccc; font-size:12px;">暫無常用標籤</span>';
-            return;
-        }
-        tags.forEach(word => {
-            const span = document.createElement('span');
-            span.className = 'tag';
-            span.innerText = word;
-            span.onclick = () => {
-                searchInput.value = word;
-                performSearch(word);
-            };
-            hotTagsContainer.appendChild(span);
-        });
-    }
-
-    // 監聽輸入
-    searchInput.addEventListener('input', (e) => performSearch(e.target.value));
-    searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && e.target.value.trim() !== '') {
-            recordSearch(e.target.value);
-        }
-    });
-
-    // 6. 渲染結果表格 (修改：增加星星按鈕)
-    function displayResults(data) {
-        resultBody.innerHTML = '';
         if (data.length === 0) {
-            noResult.style.display = 'block';
+            tbody.innerHTML = '';
+            noRes.style.display = 'block';
             return;
         }
-        noResult.style.display = 'none';
-
-        resultBody.innerHTML = data.map(item => {
-            const isFav = favorites.includes(item.code);
+        
+        noRes.style.display = 'none';
+        tbody.innerHTML = data.map(item => {
+            const isFav = favorites.some(f => f.code === item.code);
             return `
                 <tr>
-                    <td>
-                        <span class="fav-btn ${isFav ? 'active' : ''}" 
-                              onclick="toggleFavorite('${item.code}')">
-                            ${isFav ? '★' : '☆'}
-                        </span>
-                    </td>
+                    <td><span class="star ${isFav?'active':''}" onclick="toggleFav('${item.code}')">${isFav?'★':'☆'}</span></td>
                     <td class="code-cell">${item.code}</td>
-                    <td>${item.en}</td>
-                    <td>${item.zh}</td>
+                    <td>
+                        <div style="font-weight:500">${item.zh}</div>
+                        <div style="font-size:12px; color:#888">${item.en}</div>
+                    </td>
                 </tr>
             `;
         }).join('');
     }
+
+    // 4. 收藏邏輯
+    function toggleFav(code) {
+        const index = favorites.findIndex(f => f.code === code);
+        if (index > -1) {
+            favorites.splice(index, 1);
+        } else {
+            const item = icdData.find(i => i.code === code);
+            if (item) favorites.unshift(item); // 新收藏的放最上面
+        }
+        
+        localStorage.setItem('icdFav_v2', JSON.stringify(favorites));
+        renderFavorites();
+        performSearch(document.getElementById('searchInput').value);
+    }
+
+    // 5. 渲染右側收藏欄
+    function renderFavorites() {
+        const container = document.getElementById('favList');
+        if (favorites.length === 0) {
+            container.innerHTML = '<div style="color:#ccc; font-size:13px;">尚未收藏任何代碼</div>';
+            return;
+        }
+
+        container.innerHTML = favorites.map(item => `
+            <div class="fav-item">
+                <div class="fav-item-info">
+                    <span class="fav-item-code">${item.code}</span>
+                    <span>${item.zh}</span>
+                </div>
+                <span class="remove-fav" onclick="toggleFav('${item.code}')">✕</span>
+            </div>
+        `).join('');
+    }
+
+    // 6. 輸入防抖 (Debounce) 減少運算負擔
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => {
+            performSearch(e.target.value);
+        }, 200); // 停止輸入 0.2 秒後才執行搜尋
+    });
 </script>
 
 </body>
