@@ -1,0 +1,1132 @@
+[
+    {
+        "code": "A000",
+        "en": "Cholera due to Vibrio cholerae 01, biovar cholerae",
+        "zh": "由霍亂弧菌 01 引起的霍亂，古典生物型"
+    },
+    {
+        "code": "A001",
+        "en": "Cholera due to Vibrio cholerae 01, biovar eltor",
+        "zh": "由霍亂弧菌 01 引起的霍亂，埃爾托生物型"
+    },
+    {
+        "code": "A009",
+        "en": "Cholera, unspecified",
+        "zh": "未特指的霍亂"
+    },
+    {
+        "code": "A0100",
+        "en": "Typhoid fever, unspecified",
+        "zh": "未特指的傷寒"
+    },
+    {
+        "code": "A0101",
+        "en": "Typhoid meningitis",
+        "zh": "傷寒性腦膜炎"
+    },
+    {
+        "code": "A0102",
+        "en": "Typhoid fever with heart involvement",
+        "zh": "傷寒熱伴有心臟受累"
+    },
+    {
+        "code": "A0103",
+        "en": "Typhoid pneumonia",
+        "zh": "傷寒性肺炎"
+    },
+    {
+        "code": "A0104",
+        "en": "Typhoid arthritis",
+        "zh": "傷寒性關節炎"
+    },
+    {
+        "code": "A0105",
+        "en": "Typhoid osteomyelitis",
+        "zh": "傷寒性骨髓炎"
+    },
+    {
+        "code": "A0109",
+        "en": "Typhoid fever with other complications",
+        "zh": "傷寒熱伴有其他併發症"
+    },
+    {
+        "code": "A011",
+        "en": "Paratyphoid fever A",
+        "zh": "A 型副傷寒"
+    },
+    {
+        "code": "A012",
+        "en": "Paratyphoid fever B",
+        "zh": "B 型副傷寒"
+    },
+    {
+        "code": "A013",
+        "en": "Paratyphoid fever C",
+        "zh": "C 型副傷寒"
+    },
+    {
+        "code": "A014",
+        "en": "Paratyphoid fever, unspecified",
+        "zh": "未特指的副傷寒"
+    },
+    {
+        "code": "A020",
+        "en": "Salmonella enteritis",
+        "zh": "沙門氏菌腸炎"
+    },
+    {
+        "code": "A021",
+        "en": "Salmonella sepsis",
+        "zh": "沙門氏菌敗血症"
+    },
+    {
+        "code": "A0220",
+        "en": "Local salmonella infection, unspecified",
+        "zh": "未特指的局部沙門氏菌感染"
+    },
+    {
+        "code": "A0221",
+        "en": "Salmonella meningitis",
+        "zh": "沙門氏菌腦膜炎"
+    },
+    {
+        "code": "A0222",
+        "en": "Salmonella pneumonia",
+        "zh": "沙門氏菌肺炎"
+    },
+    {
+        "code": "A0223",
+        "en": "Salmonella arthritis",
+        "zh": "沙門氏菌關節炎"
+    },
+    {
+        "code": "A0224",
+        "en": "Salmonella osteomyelitis",
+        "zh": "沙門氏菌骨髓炎"
+    },
+    {
+        "code": "A0225",
+        "en": "Salmonella pyelonephritis",
+        "zh": "沙門氏菌腎盂腎炎"
+    },
+    {
+        "code": "A0229",
+        "en": "Salmonella with other localized infection",
+        "zh": "沙門氏菌伴有其他局限性感染"
+    },
+    {
+        "code": "A028",
+        "en": "Other specified salmonella infections",
+        "zh": "其他特指的沙門氏菌感染"
+    },
+    {
+        "code": "A029",
+        "en": "Salmonella infection, unspecified",
+        "zh": "未特指的沙門氏菌感染"
+    },
+    {
+        "code": "A030",
+        "en": "Shigellosis due to Shigella dysenteriae",
+        "zh": "志賀氏菌病，由痢疾志賀氏菌引起"
+    },
+    {
+        "code": "A031",
+        "en": "Shigellosis due to Shigella flexneri",
+        "zh": "志賀氏菌病，由佛氏志賀氏菌引起"
+    },
+    {
+        "code": "A032",
+        "en": "Shigellosis due to Shigella boydii",
+        "zh": "志賀氏菌病，由鮑氏志賀氏菌引起"
+    },
+    {
+        "code": "A033",
+        "en": "Shigellosis due to Shigella sonnei",
+        "zh": "志賀氏菌病，由宋內氏志賀氏菌引起"
+    },
+    {
+        "code": "A038",
+        "en": "Other shigellosis",
+        "zh": "其他志賀氏菌病"
+    },
+    {
+        "code": "A039",
+        "en": "Shigellosis, unspecified",
+        "zh": "未特指的志賀氏菌病"
+    },
+    {
+        "code": "B000",
+        "en": "Herpesviral eczema",
+        "zh": "皰疹病毒性濕疹"
+    },
+    {
+        "code": "B001",
+        "en": "Herpesviral vesicular dermatitis",
+        "zh": "皰疹病毒性水皰性皮炎"
+    },
+    {
+        "code": "B002",
+        "en": "Herpesviral gingivostomatitis and pharyngotonsillitis",
+        "zh": "皰疹病毒性齦口炎及咽扁桃體炎"
+    },
+    {
+        "code": "B003",
+        "en": "Herpesviral meningitis",
+        "zh": "皰疹病毒性腦膜炎"
+    },
+    {
+        "code": "B004",
+        "en": "Herpesviral encephalitis",
+        "zh": "皰疹病毒性腦炎"
+    },
+    {
+        "code": "B0050",
+        "en": "Herpesviral ocular disease, unspecified",
+        "zh": "未特指的皰疹病毒性眼病"
+    },
+    {
+        "code": "B0051",
+        "en": "Herpesviral iridocyclitis",
+        "zh": "皰疹病毒性虹膜睫狀體炎"
+    },
+    {
+        "code": "B0052",
+        "en": "Herpesviral keratitis",
+        "zh": "皰疹病毒性角膜炎"
+    },
+    {
+        "code": "B0053",
+        "en": "Herpesviral conjunctivitis",
+        "zh": "皰疹病毒性結膜炎"
+    },
+    {
+        "code": "B007",
+        "en": "Disseminated herpesviral disease",
+        "zh": "播散性皰疹病毒疾病"
+    },
+    {
+        "code": "B010",
+        "en": "Varicella meningitis",
+        "zh": "水痘腦膜炎"
+    },
+    {
+        "code": "B0111",
+        "en": "Varicella encephalitis",
+        "zh": "水痘腦炎"
+    },
+    {
+        "code": "B0181",
+        "en": "Varicella keratitis",
+        "zh": "水痘角膜炎"
+    },
+    {
+        "code": "B020",
+        "en": "Zoster encephalitis",
+        "zh": "帶狀皰疹腦炎"
+    },
+    {
+        "code": "B021",
+        "en": "Zoster meningitis",
+        "zh": "帶狀皰疹腦膜炎"
+    },
+    {
+        "code": "B150",
+        "en": "Hepatitis A with hepatic coma",
+        "zh": "A 型肝炎伴有肝昏迷"
+    },
+    {
+        "code": "B159",
+        "en": "Hepatitis A without hepatic coma",
+        "zh": "A 型肝炎不伴有肝昏迷"
+    },
+    {
+        "code": "B160",
+        "en": "Acute hepatitis B with delta-agent with hepatic coma",
+        "zh": "急性 B 型肝炎伴有 D 型肝炎因子及肝昏迷"
+    },
+    {
+        "code": "B161",
+        "en": "Acute hepatitis B with delta-agent without hepatic coma",
+        "zh": "急性 B 型肝炎伴有 D 型肝炎因子，不伴有肝昏迷"
+    },
+    {
+        "code": "B162",
+        "en": "Acute hepatitis B without delta-agent with hepatic coma",
+        "zh": "急性 B 型肝炎不伴有 D 型肝炎因子，但伴有肝昏迷"
+    },
+    {
+        "code": "B169",
+        "en": "Acute hepatitis B without delta-agent and without hepatic coma",
+        "zh": "急性 B 型肝炎不伴有 D 型肝炎因子，也不伴有肝昏迷"
+    },
+    {
+        "code": "B1710",
+        "en": "Acute hepatitis C without hepatic coma",
+        "zh": "急性 C 型肝炎不伴有肝昏迷"
+    },
+    {
+        "code": "B1711",
+        "en": "Acute hepatitis C with hepatic coma",
+        "zh": "急性 C 型肝炎伴有肝昏迷"
+    },
+    {
+        "code": "B180",
+        "en": "Chronic viral hepatitis B with delta-agent",
+        "zh": "慢性 B 型病毒性肝炎伴有 D 型肝炎因子"
+    },
+    {
+        "code": "B181",
+        "en": "Chronic viral hepatitis B without delta-agent",
+        "zh": "慢性 B 型病毒性肝炎不伴有 D 型肝炎因子"
+    },
+    {
+        "code": "B182",
+        "en": "Chronic viral hepatitis C",
+        "zh": "慢性 C 型病毒性肝炎"
+    },
+    {
+        "code": "B190",
+        "en": "Unspecified viral hepatitis with hepatic coma",
+        "zh": "未特指的病毒性肝炎伴有肝昏迷"
+    },
+    {
+        "code": "B20",
+        "en": "Human immunodeficiency virus [HIV] disease",
+        "zh": "人類免疫缺乏病毒 [HIV] 疾病"
+    },
+    {
+        "code": "B350",
+        "en": "Tinea barbae and tinea capitis",
+        "zh": "鬚癬和頭癬"
+    },
+    {
+        "code": "B351",
+        "en": "Tinea unguium",
+        "zh": "甲癬 (灰指甲)"
+    },
+    {
+        "code": "B353",
+        "en": "Tinea pedis",
+        "zh": "足癬 (香港腳)"
+    },
+    {
+        "code": "B370",
+        "en": "Candidal stomatitis",
+        "zh": "念珠菌性口炎"
+    },
+    {
+        "code": "C000",
+        "en": "Malignant neoplasm of external upper lip",
+        "zh": "上唇外側惡性腫瘤"
+    },
+    {
+        "code": "C001",
+        "en": "Malignant neoplasm of external lower lip",
+        "zh": "下唇外側惡性腫瘤"
+    },
+    {
+        "code": "C002",
+        "en": "Malignant neoplasm of external lip, unspecified",
+        "zh": "未特指的唇外側惡性腫瘤"
+    },
+    {
+        "code": "C003",
+        "en": "Malignant neoplasm of upper lip, inner aspect",
+        "zh": "上唇內側惡性腫瘤"
+    },
+    {
+        "code": "C004",
+        "en": "Malignant neoplasm of lower lip, inner aspect",
+        "zh": "下唇內側惡性腫瘤"
+    },
+    {
+        "code": "C01",
+        "en": "Malignant neoplasm of base of tongue",
+        "zh": "舌根惡性腫瘤"
+    },
+    {
+        "code": "C020",
+        "en": "Malignant neoplasm of dorsal surface of tongue",
+        "zh": "舌背惡性腫瘤"
+    },
+    {
+        "code": "C021",
+        "en": "Malignant neoplasm of border of tongue",
+        "zh": "舌緣惡性腫瘤"
+    },
+    {
+        "code": "C022",
+        "en": "Malignant neoplasm of ventral surface of tongue",
+        "zh": "舌腹惡性腫瘤"
+    },
+    {
+        "code": "C153",
+        "en": "Malignant neoplasm of upper third of esophagus",
+        "zh": "食道上三分之一惡性腫瘤"
+    },
+    {
+        "code": "C154",
+        "en": "Malignant neoplasm of middle third of esophagus",
+        "zh": "食道中三分之一惡性腫瘤"
+    },
+    {
+        "code": "C155",
+        "en": "Malignant neoplasm of lower third of esophagus",
+        "zh": "食道下三分之一惡性腫瘤"
+    },
+    {
+        "code": "C160",
+        "en": "Malignant neoplasm of cardia",
+        "zh": "胃賁門惡性腫瘤"
+    },
+    {
+        "code": "C180",
+        "en": "Malignant neoplasm of cecum",
+        "zh": "盲腸惡性腫瘤"
+    },
+    {
+        "code": "C182",
+        "en": "Malignant neoplasm of ascending colon",
+        "zh": "升結腸惡性腫瘤"
+    },
+    {
+        "code": "C184",
+        "en": "Malignant neoplasm of transverse colon",
+        "zh": "橫結腸惡性腫瘤"
+    },
+    {
+        "code": "C186",
+        "en": "Malignant neoplasm of descending colon",
+        "zh": "降結腸惡性腫瘤"
+    },
+    {
+        "code": "C187",
+        "en": "Malignant neoplasm of sigmoid colon",
+        "zh": "乙狀結腸惡性腫瘤"
+    },
+    {
+        "code": "C220",
+        "en": "Liver cell carcinoma",
+        "zh": "肝細胞癌"
+    },
+    {
+        "code": "C3401",
+        "en": "Malignant neoplasm of right main bronchus",
+        "zh": "右側主支氣管惡性腫瘤"
+    },
+    {
+        "code": "C3402",
+        "en": "Malignant neoplasm of left main bronchus",
+        "zh": "左側主支氣管惡性腫瘤"
+    },
+    {
+        "code": "C3411",
+        "en": "Malignant neoplasm of upper lobe, right bronchus or lung",
+        "zh": "右肺上葉惡性腫瘤"
+    },
+    {
+        "code": "C3412",
+        "en": "Malignant neoplasm of upper lobe, left bronchus or lung",
+        "zh": "左肺上葉惡性腫瘤"
+    },
+    {
+        "code": "C430",
+        "en": "Malignant melanoma of lip",
+        "zh": "唇部惡性黑色素瘤"
+    },
+    {
+        "code": "C4352",
+        "en": "Malignant melanoma of skin of left breast",
+        "zh": "左乳房皮膚惡性黑色素瘤"
+    },
+    {
+        "code": "C50011",
+        "en": "Malignant neoplasm of nipple and areola, right female breast",
+        "zh": "右側女性乳房乳頭及乳暈惡性腫瘤"
+    },
+    {
+        "code": "C50012",
+        "en": "Malignant neoplasm of nipple and areola, left female breast",
+        "zh": "左側女性乳房乳頭及乳暈惡性腫瘤"
+    },
+    {
+        "code": "C61",
+        "en": "Malignant neoplasm of prostate",
+        "zh": "前列腺惡性腫瘤"
+    },
+    {
+        "code": "C641",
+        "en": "Malignant neoplasm of right kidney, except renal pelvis",
+        "zh": "右腎惡性腫瘤 (除外腎盂)"
+    },
+    {
+        "code": "C642",
+        "en": "Malignant neoplasm of left kidney, except renal pelvis",
+        "zh": "左腎惡性腫瘤 (除外腎盂)"
+    },
+    {
+        "code": "C711",
+        "en": "Malignant neoplasm of frontal lobe",
+        "zh": "額葉惡性腫瘤"
+    },
+    {
+        "code": "C712",
+        "en": "Malignant neoplasm of temporal lobe",
+        "zh": "顳葉惡性腫瘤"
+    },
+    {
+        "code": "D0000",
+        "en": "Carcinoma in situ of oral cavity, unspecified site",
+        "zh": "口腔原位癌，未特指部位"
+    },
+    {
+        "code": "D010",
+        "en": "Carcinoma in situ of colon",
+        "zh": "結腸原位癌"
+    },
+    {
+        "code": "D030",
+        "en": "Melanoma in situ of lip",
+        "zh": "唇部原位黑色素瘤"
+    },
+    {
+        "code": "D0511",
+        "en": "Intraductal carcinoma in situ of right breast",
+        "zh": "右側乳房導管內原位癌"
+    },
+    {
+        "code": "D060",
+        "en": "Carcinoma in situ of endocervix",
+        "zh": "子宮頸內口原位癌"
+    },
+    {
+        "code": "D126",
+        "en": "Benign neoplasm of colon, unspecified",
+        "zh": "結腸良性腫瘤，未特指"
+    },
+    {
+        "code": "D509",
+        "en": "Iron deficiency anemia, unspecified",
+        "zh": "缺鐵性貧血，未特指"
+    },
+    {
+        "code": "D649",
+        "en": "Anemia, unspecified",
+        "zh": "貧血，未特指"
+    },
+    {
+        "code": "E039",
+        "en": "Hypothyroidism, unspecified",
+        "zh": "甲狀腺功能減退症 (甲減)，未特指"
+    },
+    {
+        "code": "E0590",
+        "en": "Thyrotoxicosis, unspecified without thyrotoxic crisis or storm",
+        "zh": "甲狀腺毒症，未特指且不伴有甲狀腺風暴"
+    },
+    {
+        "code": "E109",
+        "en": "Type 1 diabetes mellitus without complications",
+        "zh": "第 1 型糖尿病，不伴有併發症"
+    },
+    {
+        "code": "E1165",
+        "en": "Type 2 diabetes mellitus with hyperglycemia",
+        "zh": "第 2 型糖尿病，伴有高血糖"
+    },
+    {
+        "code": "E119",
+        "en": "Type 2 diabetes mellitus without complications",
+        "zh": "第 2 型糖尿病，不伴有併發症"
+    },
+    {
+        "code": "E6601",
+        "en": "Morbid (severe) obesity due to excess calories",
+        "zh": "因攝取過多熱量導致的病理性 (重度) 肥胖"
+    },
+    {
+        "code": "E669",
+        "en": "Obesity, unspecified",
+        "zh": "肥胖，未特指"
+    },
+    {
+        "code": "E7220",
+        "en": "Disorder of urea cycle metabolism, unspecified",
+        "zh": "尿素循環代謝障礙，未特指"
+    },
+    {
+        "code": "E730",
+        "en": "Congenital lactase deficiency",
+        "zh": "先天性乳糖酶缺乏"
+    },
+    {
+        "code": "E785",
+        "en": "Hyperlipidemia, unspecified",
+        "zh": "高脂血症，未特指"
+    },
+    {
+        "code": "E860",
+        "en": "Dehydration",
+        "zh": "脫水"
+    },
+    {
+        "code": "F0150",
+        "en": "Vascular dementia without behavioral disturbance",
+        "zh": "血管性失智症，不伴有行為紊亂"
+    },
+    {
+        "code": "F0390",
+        "en": "Unspecified dementia without behavioral disturbance",
+        "zh": "未特指的失智症，不伴有行為紊亂"
+    },
+    {
+        "code": "F1010",
+        "en": "Alcohol abuse, uncomplicated",
+        "zh": "酒精濫用，無併發症"
+    },
+    {
+        "code": "F329",
+        "en": "Major depressive disorder, single episode, unspecified",
+        "zh": "重度憂鬱症，單次發作，未特指"
+    },
+    {
+        "code": "F411",
+        "en": "Generalized anxiety disorder",
+        "zh": "廣泛性焦慮症"
+    },
+    {
+        "code": "F419",
+        "en": "Anxiety disorder, unspecified",
+        "zh": "焦慮症，未特指"
+    },
+    {
+        "code": "F909",
+        "en": "Attention-deficit hyperactivity disorder, unspecified type",
+        "zh": "注意力缺陷過動症 (ADHD)，未特指類型"
+    },
+    {
+        "code": "G309",
+        "en": "Alzheimer's disease, unspecified",
+        "zh": "阿茲海默症，未特指"
+    },
+    {
+        "code": "G20",
+        "en": "Parkinson's disease",
+        "zh": "帕金森氏症"
+    },
+    {
+        "code": "G40909",
+        "en": "Epilepsy, unspecified, not intractable, without status epilepticus",
+        "zh": "癲癇，未特指，非難治性，且不伴有癲癇持續狀態"
+    },
+    {
+        "code": "G43909",
+        "en": "Migraine, unspecified, not intractable, without status migrainosus",
+        "zh": "偏頭痛，未特指，非難治性，且不伴有偏頭痛持續狀態"
+    },
+    {
+        "code": "G44209",
+        "en": "Tension-type headache, unspecified, not intractable",
+        "zh": "張力型頭痛，未特指，非難治性"
+    },
+    {
+        "code": "G4700",
+        "en": "Insomnia, unspecified",
+        "zh": "失眠症，未特指"
+    },
+    {
+        "code": "H109",
+        "en": "Unspecified conjunctivitis",
+        "zh": "未特指的結膜炎"
+    },
+    {
+        "code": "H259",
+        "en": "Senile cataract, unspecified",
+        "zh": "老年性白內障，未特指"
+    },
+    {
+        "code": "H269",
+        "en": "Cataract, unspecified",
+        "zh": "白內障，未特指"
+    },
+    {
+        "code": "H409",
+        "en": "Unspecified glaucoma",
+        "zh": "未特指的青光眼"
+    },
+    {
+        "code": "H5210",
+        "en": "Myopia, unspecified eye",
+        "zh": "近視，未特指眼"
+    },
+    {
+        "code": "H6690",
+        "en": "Otitis media, unspecified, unspecified ear",
+        "zh": "中耳炎，未特指眼，未特指耳"
+    },
+    {
+        "code": "H9190",
+        "en": "Unspecified hearing loss, unspecified ear",
+        "zh": "未特指的聽力喪失，未特指耳"
+    },
+    {
+        "code": "I10",
+        "en": "Essential (primary) hypertension",
+        "zh": "原發性高血壓"
+    },
+    {
+        "code": "I209",
+        "en": "Angina pectoris, unspecified",
+        "zh": "心絞痛，未特指"
+    },
+    {
+        "code": "I213",
+        "en": "ST elevation (STEMI) myocardial infarction of unspecified site",
+        "zh": "ST 段上升型心肌梗塞 (STEMI)，未特指部位"
+    },
+    {
+        "code": "I2510",
+        "en": "Atherosclerotic heart disease of native coronary artery without angina pectoris",
+        "zh": "原生冠狀動脈粥樣硬化性心臟病，不伴有心絞痛"
+    },
+    {
+        "code": "I4820",
+        "en": "Chronic atrial fibrillation, unspecified",
+        "zh": "慢性心房顫動，未特指"
+    },
+    {
+        "code": "I509",
+        "en": "Heart failure, unspecified",
+        "zh": "心臟衰竭，未特指"
+    },
+    {
+        "code": "I639",
+        "en": "Cerebral infarction, unspecified",
+        "zh": "腦梗塞，未特指"
+    },
+    {
+        "code": "I82409",
+        "en": "Acute embolism and thrombosis of unspecified deep veins of unspecified lower extremity",
+        "zh": "急性栓塞及下肢深層靜脈血栓，未特指側"
+    },
+    {
+        "code": "J00",
+        "en": "Acute nasopharyngitis [common cold]",
+        "zh": "急性鼻咽炎 [感冒]"
+    },
+    {
+        "code": "J0190",
+        "en": "Acute sinusitis, unspecified",
+        "zh": "急性鼻竇炎，未特指"
+    },
+    {
+        "code": "J189",
+        "en": "Pneumonia, unspecified organism",
+        "zh": "肺炎，未特指病原體"
+    },
+    {
+        "code": "J329",
+        "en": "Chronic sinusitis, unspecified",
+        "zh": "慢性鼻竇炎，未特指"
+    },
+    {
+        "code": "J449",
+        "en": "Chronic obstructive pulmonary disease, unspecified",
+        "zh": "慢性阻塞性肺病 (COPD)，未特指"
+    },
+    {
+        "code": "J45909",
+        "en": "Unspecified asthma, uncomplicated",
+        "zh": "未特指的哮喘，無併發症"
+    },
+    {
+        "code": "J9600",
+        "en": "Acute respiratory failure, unspecified whether with hypoxia or hypercapnia",
+        "zh": "急性呼吸衰竭，未特指是否伴有低氧或高碳酸血症"
+    },
+    {
+        "code": "K219",
+        "en": "Gastro-esophageal reflux disease without esophagitis",
+        "zh": "胃食道逆流疾病，不伴有食道炎"
+    },
+    {
+        "code": "K2970",
+        "en": "Gastritis, unspecified, without bleeding",
+        "zh": "胃炎，未特指，不伴有出血"
+    },
+    {
+        "code": "K3580",
+        "en": "Unspecified acute appendicitis",
+        "zh": "未特指的急性闌尾炎"
+    },
+    {
+        "code": "K4090",
+        "en": "Unilateral inguinal hernia, without obstruction or gangrene, not specified as recurrent",
+        "zh": "單側腹股溝疝氣，不伴有阻塞或壞疽，未指明為復發性"
+    },
+    {
+        "code": "K5730",
+        "en": "Diverticulosis of large intestine without perforation or abscess without bleeding",
+        "zh": "大腸憩室病，不伴有穿孔、膿腫或出血"
+    },
+    {
+        "code": "K7460",
+        "en": "Unspecified cirrhosis of liver",
+        "zh": "未特指的肝硬化"
+    },
+    {
+        "code": "K8020",
+        "en": "Calculus of gallbladder without cholecystitis without obstruction",
+        "zh": "膽囊結石，不伴有膽囊炎或阻塞"
+    },
+    {
+        "code": "L0390",
+        "en": "Cellulitis, unspecified",
+        "zh": "蜂窩性組織炎，未特指"
+    },
+    {
+        "code": "L209",
+        "en": "Atopic dermatitis, unspecified",
+        "zh": "異位性皮炎，未特指"
+    },
+    {
+        "code": "L309",
+        "en": "Dermatitis, unspecified",
+        "zh": "皮炎，未特指"
+    },
+    {
+        "code": "L509",
+        "en": "Urticaria, unspecified",
+        "zh": "蕁麻疹，未特指"
+    },
+    {
+        "code": "L8990",
+        "en": "Pressure ulcer of unspecified site, unspecified stage",
+        "zh": "未特指部位的壓力性潰瘍（褥瘡），未特指階段"
+    },
+    {
+        "code": "L97909",
+        "en": "Non-pressure chronic ulcer of unspecified part of unspecified lower leg with unspecified severity",
+        "zh": "未特指下肢部位的非壓力性慢性潰瘍"
+    },
+    {
+        "code": "M1711",
+        "en": "Unilateral primary osteoarthritis, right knee",
+        "zh": "右膝原發性骨關節炎"
+    },
+    {
+        "code": "M1712",
+        "en": "Unilateral primary osteoarthritis, left knee",
+        "zh": "左膝原發性骨關節炎"
+    },
+    {
+        "code": "M1990",
+        "en": "Unspecified osteoarthritis, unspecified site",
+        "zh": "未特指部位的骨關節炎"
+    },
+    {
+        "code": "M25511",
+        "en": "Pain in right shoulder",
+        "zh": "右肩疼痛"
+    },
+    {
+        "code": "M25512",
+        "en": "Pain in left shoulder",
+        "zh": "左肩疼痛"
+    },
+    {
+        "code": "M25561",
+        "en": "Pain in right knee",
+        "zh": "右膝疼痛"
+    },
+    {
+        "code": "M25562",
+        "en": "Pain in left knee",
+        "zh": "左膝疼痛"
+    },
+    {
+        "code": "M5450",
+        "en": "Low back pain, unspecified",
+        "zh": "下背痛，未特指"
+    },
+    {
+        "code": "M810",
+        "en": "Age-related osteoporosis without current pathological fracture",
+        "zh": "老年性骨質疏鬆症，不伴有病理性骨折"
+    },
+    {
+        "code": "N179",
+        "en": "Acute kidney failure, unspecified",
+        "zh": "急性腎衰竭，未特指"
+    },
+    {
+        "code": "N186",
+        "en": "End stage renal disease",
+        "zh": "末期腎臟病 (ESRD)"
+    },
+    {
+        "code": "N189",
+        "en": "Chronic kidney disease, unspecified",
+        "zh": "慢性腎臟病 (CKD)，未特指"
+    },
+    {
+        "code": "N200",
+        "en": "Calculus of kidney",
+        "zh": "腎結石"
+    },
+    {
+        "code": "N390",
+        "en": "Urinary tract infection, site not specified",
+        "zh": "尿路感染 (UTI)，未特指部位"
+    },
+    {
+        "code": "N400",
+        "en": "Benign prostatic hyperplasia without lower urinary tract symptoms",
+        "zh": "良性前列腺增生 (肥大)，不伴有下尿路症狀"
+    },
+    {
+        "code": "O0090",
+        "en": "Ectopic pregnancy, unspecified, without intrauterine pregnancy",
+        "zh": "異位妊娠（子宮外孕），未特指，不伴有宮內妊娠"
+    },
+    {
+        "code": "O0990",
+        "en": "Supervision of high risk pregnancy, unspecified, unspecified trimester",
+        "zh": "高危險妊娠之監測，未特指妊娠期"
+    },
+    {
+        "code": "O24410",
+        "en": "Gestational diabetes mellitus in pregnancy, diet controlled",
+        "zh": "妊娠糖尿病，飲食控制"
+    },
+    {
+        "code": "O24414",
+        "en": "Gestational diabetes mellitus in pregnancy, insulin controlled",
+        "zh": "妊娠糖尿病，胰島素控制"
+    },
+    {
+        "code": "O30003",
+        "en": "Twin pregnancy, unspecified number of placenta and unspecified number of amniotic sacs, third trimester",
+        "zh": "雙胞胎妊娠，未特指胎盤及羊膜囊數量，第三孕期"
+    },
+    {
+        "code": "O480",
+        "en": "Post-term pregnancy",
+        "zh": "過期妊娠"
+    },
+    {
+        "code": "O80",
+        "en": "Encounter for full-term uncomplicated delivery",
+        "zh": "足月無併發症分娩"
+    },
+    {
+        "code": "P0730",
+        "en": "Preterm newborn, unspecified weeks of gestation",
+        "zh": "早產新生兒，未特指妊娠週數"
+    },
+    {
+        "code": "P220",
+        "en": "Respiratory distress syndrome of newborn",
+        "zh": "新生兒呼吸窘迫症候群"
+    },
+    {
+        "code": "P599",
+        "en": "Neonatal jaundice, unspecified",
+        "zh": "新生兒黃疸，未特指"
+    },
+    {
+        "code": "Q059",
+        "en": "Spina bifida, unspecified",
+        "zh": "脊柱裂，未特指"
+    },
+    {
+        "code": "Q211",
+        "en": "Atrial septal defect",
+        "zh": "心房中隔缺損"
+    },
+    {
+        "code": "Q210",
+        "en": "Ventricular septal defect",
+        "zh": "心室中隔缺損"
+    },
+    {
+        "code": "Q359",
+        "en": "Cleft palate, unspecified",
+        "zh": "顎裂，未特指"
+    },
+    {
+        "code": "Q379",
+        "en": "Unspecified cleft lip and cleft palate",
+        "zh": "未特指的唇裂伴顎裂"
+    },
+    {
+        "code": "Q909",
+        "en": "Down syndrome, unspecified",
+        "zh": "唐氏症候群，未特指"
+    },
+    {
+        "code": "R059",
+        "en": "Cough, unspecified",
+        "zh": "咳嗽，未特指"
+    },
+    {
+        "code": "R0602",
+        "en": "Shortness of breath",
+        "zh": "呼吸急促 (氣短)"
+    },
+    {
+        "code": "R079",
+        "en": "Chest pain, unspecified",
+        "zh": "胸痛，未特指"
+    },
+    {
+        "code": "R109",
+        "en": "Unspecified abdominal pain",
+        "zh": "未特指的腹痛"
+    },
+    {
+        "code": "R112",
+        "en": "Nausea with vomiting, unspecified",
+        "zh": "噁心伴有嘔吐，未特指"
+    },
+    {
+        "code": "R4182",
+        "en": "Altered mental status, unspecified",
+        "zh": "意識狀態改變，未特指"
+    },
+    {
+        "code": "R509",
+        "en": "Fever, unspecified",
+        "zh": "發燒，未特指"
+    },
+    {
+        "code": "R519",
+        "en": "Headache, unspecified",
+        "zh": "頭痛，未特指"
+    },
+    {
+        "code": "R531",
+        "en": "Weakness",
+        "zh": "虛弱"
+    },
+    {
+        "code": "S069X0A",
+        "en": "Unspecified intracranial injury without loss of consciousness, initial encounter",
+        "zh": "未特指的顱內損傷，不伴有意識喪失，初次就診"
+    },
+    {
+        "code": "S52501A",
+        "en": "Unspecified fracture of lower end of right radius, initial encounter for closed fracture",
+        "zh": "右橈骨下端未特指骨折，閉合性骨折之初次就診"
+    },
+    {
+        "code": "S93401A",
+        "en": "Sprain of unspecified ligament of right ankle, initial encounter",
+        "zh": "右踝未特指韌帶扭傷，初次就診"
+    },
+    {
+        "code": "T148",
+        "en": "Other injury of unspecified body region",
+        "zh": "未特指身體部位的其他損傷"
+    },
+    {
+        "code": "T3390XA",
+        "en": "Superficial frostbite of unspecified sites, initial encounter",
+        "zh": "未特指部位的表淺凍傷，初次就診"
+    },
+    {
+        "code": "T7840XA",
+        "en": "Allergy, unspecified, initial encounter",
+        "zh": "過敏，未特指，初次就診"
+    },
+    {
+        "code": "T8140XA",
+        "en": "Infection following a procedure, unspecified, initial encounter",
+        "zh": "手術後感染，未特指，初次就診"
+    },
+    {
+        "code": "U071",
+        "en": "COVID-19",
+        "zh": "嚴重特殊傳染性肺炎 (COVID-19)"
+    },
+    {
+        "code": "V4352XA",
+        "en": "Driver injured in collision with sport utility vehicle in traffic accident, initial encounter",
+        "zh": "駕駛人在交通事故中與運動型多用途車 (SUV) 相撞受傷，初次就診"
+    },
+    {
+        "code": "W19XXXA",
+        "en": "Unspecified fall, initial encounter",
+        "zh": "未特指的跌倒，初次就診"
+    },
+    {
+        "code": "X58XXXA",
+        "en": "Exposure to other specified factors, initial encounter",
+        "zh": "暴露於其他特指因素，初次就診"
+    },
+    {
+        "code": "Y929",
+        "en": "Unspecified place or location of external cause",
+        "zh": "未特指的外部原因發生地點"
+    },
+    {
+        "code": "Z0000",
+        "en": "Encounter for general adult medical examination without abnormal findings",
+        "zh": "成人一般健康檢查，無異常發現"
+    },
+    {
+        "code": "Z1159",
+        "en": "Encounter for screening for other viral diseases",
+        "zh": "其他病毒性疾病篩檢之醫療接觸"
+    },
+    {
+        "code": "Z23",
+        "en": "Encounter for immunization",
+        "zh": "疫苗接種之醫療接觸"
+    },
+    {
+        "code": "Z5111",
+        "en": "Encounter for antineoplastic chemotherapy",
+        "zh": "抗腫瘤化學治療之醫療接觸"
+    },
+    {
+        "code": "Z711",
+        "en": "Person with feared complaint in whom no diagnosis is made",
+        "zh": "懷疑患有某種疾病但未確診者"
+    },
+    {
+        "code": "Z853",
+        "en": "Personal history of malignant neoplasm of breast",
+        "zh": "乳房惡性腫瘤個人病史"
+    },
+    {
+        "code": "Z9181",
+        "en": "History of falling",
+        "zh": "跌倒病史"
+    },
+    {
+        "code": "Z940",
+        "en": "Kidney transplant status",
+        "zh": "腎臟移植狀態"
+    },
+    {
+        "code": "Z98891",
+        "en": "History of uterine scar from previous surgery",
+        "zh": "曾因手術導致子宮疤痕之病史"
+    },
+    {
+        "code": "Z992",
+        "en": "Dependence on renal dialysis",
+        "zh": "依賴腎臟透析"
+    },
+    {
+        "code": "Z993",
+        "en": "Dependence on wheelchair",
+        "zh": "依賴輪椅"
+    },
+    {
+        "code": "Z9981",
+        "en": "Dependence on supplemental oxygen",
+        "zh": "依賴輔助氧氣"
+    }
+]
