@@ -3,292 +3,273 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICD-10查詢系統V1.0</title>
+    <title>ICD-10 疾病查詢系統</title>
     <style>
         :root {
-            --bg-main: #f0f4f8;
-            --panel-bg: rgba(255, 255, 255, 0.75);
-            --accent-cyan: #00d2ff;
-            --accent-blue: #0045ff;
-            --text-dark: #1a202c;
-            --tech-pink: #ff007a;
+            --bg-deep: #0f172a;       /* 深藍黑背景 */
+            --card-bg: #1e293b;      /* 卡片深灰色 */
+            --accent: #0ea5e9;       /* 亮藍色 */
+            --text-main: #f8fafc;    /* 近純白文字 */
+            --text-muted: #94a3b8;   /* 灰色文字 */
+            --highlight: #f472b6;    /* 螢光粉 (代碼用) */
+            --fav-star: #fbbf24;     /* 亮黃色星星 */
+            --danger: #ef4444;       /* 警告紅 */
         }
 
         body {
-            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             margin: 0;
-            background: var(--bg-main);
-            color: var(--text-dark);
-            background-image: radial-gradient(circle at 2px 2px, rgba(0,0,0,0.05) 1px, transparent 0);
-            background-size: 30px 30px;
-            overflow-x: hidden;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            line-height: 1.5;
         }
 
-        #bgCanvas {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-            opacity: 0.3;
-        }
-
+        /* 佈局容器 */
         .main-layout {
             display: flex;
-            flex-direction: row; /* 預設橫向 */
             max-width: 1400px;
-            margin: 20px auto;
-            gap: 20px;
-            padding: 0 15px;
-            box-sizing: border-box;
+            margin: 30px auto;
+            gap: 25px;
+            padding: 0 20px;
         }
 
-        /* 響應式核心：小螢幕切換為垂直排列 */
-        @media (max-width: 1024px) {
-            .main-layout {
-                flex-direction: column;
-                margin: 10px auto;
-            }
-            .side-bar {
-                order: -1; /* 收藏與圖表在手機端排到前面，或根據需求調整 */
-            }
-        }
-
-        .glass-panel {
-            background: var(--panel-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
+        /* 左側搜尋區 */
+        .search-section {
+            flex: 2;
+            background: var(--card-bg);
+            padding: 30px;
             border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.08);
-            position: relative;
-            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border: 1px solid #334155;
         }
 
-        .glass-panel::before {
-            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
-            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
+        /* 右側收藏區 */
+        .fav-section {
+            flex: 1;
+            background: #111827;
+            padding: 25px;
+            border-radius: 16px;
+            border: 2px solid var(--accent);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+            min-width: 320px;
         }
 
-        .search-section { flex: 2; padding: 25px; min-width: 0; }
-        .side-bar { flex: 1; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+        h2 { color: var(--accent); margin-top: 0; font-size: 24px; letter-spacing: 1px; }
+        h3 { color: var(--fav-star); margin-top: 0; display: flex; align-items: center; gap: 8px; }
 
-        h2 {
-            margin: 0 0 15px 0; font-size: clamp(1.2rem, 5vw, 1.75rem);
-            background: linear-gradient(45deg, var(--accent-blue), var(--tech-pink));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        .stats-info {
+            background: rgba(14, 165, 233, 0.1);
+            color: var(--accent);
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--accent);
         }
 
-        .stats-tag {
-            display: inline-block; padding: 4px 10px; background: #000; color: var(--accent-cyan);
-            font-family: monospace; font-size: 11px; border-radius: 4px; margin-bottom: 15px;
-        }
-
+        /* 輸入框強化 */
         input {
-            width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 10px;
-            background: rgba(255,255,255,0.6); font-size: 16px; box-sizing: border-box;
-            transition: 0.3s;
+            width: 100%;
+            padding: 15px;
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 10px;
+            font-size: 18px;
+            color: white;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
         }
-        input:focus { outline: none; border-color: var(--accent-cyan); background: #fff; }
-
-        /* 表格滾動容器：防止小螢幕撐開 */
-        .table-container { width: 100%; overflow-x: auto; margin-top: 15px; }
-        table { width: 100%; border-collapse: separate; border-spacing: 0 8px; min-width: 500px; }
-        th { text-align: left; padding: 10px; font-size: 12px; opacity: 0.7; }
-        td { background: white; padding: 15px 10px; border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; }
-        td:first-child { border-left: 1px solid #f0f0f0; border-radius: 10px 0 0 10px; }
-        td:last-child { border-right: 1px solid #f0f0f0; border-radius: 0 10px 10px 0; }
-
-        .code-pill {
-            background: #f0f7ff; color: var(--accent-blue); padding: 4px 8px;
-            border-radius: 5px; font-family: monospace; font-weight: 800; font-size: 0.9em;
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
         }
 
-        .chart-box { padding: 20px; text-align: center; }
-        #dataChart { width: 100%; max-height: 250px; }
+        /* 表格反差樣式 */
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            text-align: left;
+            padding: 15px;
+            border-bottom: 2px solid #334155;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+        td { padding: 18px 15px; border-bottom: 1px solid #334155; }
 
+        tr:hover { background: rgba(255,255,255,0.03); }
+
+        .code-cell {
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-weight: 800;
+            color: var(--highlight);
+            font-size: 1.1em;
+        }
+
+        .zh-name { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+        .en-name { font-size: 13px; color: var(--text-muted); font-style: italic; }
+
+        /* 星星按鈕 */
+        .star {
+            cursor: pointer;
+            font-size: 24px;
+            color: #334155;
+            transition: transform 0.2s;
+            display: inline-block;
+        }
+        .star.active { color: var(--fav-star); filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.5)); }
+        .star:hover { transform: scale(1.2); }
+
+        /* 收藏列表項目 */
         .fav-item {
-            background: white; margin-bottom: 8px; padding: 12px; border-radius: 10px;
-            border-left: 4px solid var(--tech-pink); display: flex; justify-content: space-between;
-            align-items: center; font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--fav-star);
         }
+        .fav-item-info { flex: 1; }
+        .fav-item-code { font-weight: bold; color: var(--highlight); margin-right: 10px; }
+        .remove-fav { color: #475569; cursor: pointer; font-size: 18px; }
+        .remove-fav:hover { color: var(--danger); }
 
-        @media (max-width: 480px) {
-            .search-section { padding: 15px; }
-            td { padding: 12px 8px; }
+        /* 響應式 */
+        @media (max-width: 1000px) {
+            .main-layout { flex-direction: column; }
+            .fav-section { position: static; order: -1; min-width: auto; }
         }
     </style>
 </head>
 <body>
 
-<canvas id="bgCanvas"></canvas>
-
 <div class="main-layout">
-    <div class="glass-panel search-section">
-        <div class="stats-tag">狀態：運作中 // 載入：<span id="count">0</span></div>
-        <h2>ICD-10</h2>
+    <div class="search-section">
+        <h2>ICD-10 診斷代碼核心</h2>
+        <div class="stats-info">SYSTEM READY: <span id="totalCount">...</span> CODES LOADED</div>
 
-        <input type="text" id="searchInput" placeholder="搜尋代碼或疾病名稱...">
+        <input type="text" id="searchInput" placeholder="搜尋代碼、疾病名稱 (中英文)...">
 
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr><th width="50">收藏</th><th width="100">代號</th><th>診斷名稱</th></tr>
-                </thead>
-                <tbody id="resultBody"></tbody>
-            </table>
-        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th width="50">收藏</th>
+                    <th width="100">代碼</th>
+                    <th>診斷名稱 (中/英)</th>
+                </tr>
+            </thead>
+            <tbody id="resultBody"></tbody>
+        </table>
+        <div id="noResult" style="display:none; text-align:center; padding:40px; color:var(--text-muted);">未找到匹配的診斷數據</div>
     </div>
 
-    <div class="side-bar">
-        <div class="glass-panel chart-box">
-            <h3 style="font-size: 14px; color: var(--accent-blue); margin: 0 0 15px 0; text-align: left;">📊 比例分佈分析</h3>
-            <canvas id="dataChart"></canvas>
-        </div>
-
-        <div class="glass-panel chart-box">
-            <h3 style="font-size: 14px; color: var(--tech-pink); margin: 0 0 15px 0; text-align: left;">⭐ 快速釘選</h3>
-            <div id="favList"></div>
+    <div class="fav-section">
+        <h3>⭐ 已釘選收藏</h3>
+        <div id="favList">
+            <div style="color:var(--text-muted); font-size:14px; text-align:center; padding:20px;">尚無釘選項目</div>
         </div>
     </div>
 </div>
 
 <script>
-    const bgCanvas = document.getElementById('bgCanvas');
-    const bgCtx = bgCanvas.getContext('2d');
-    const dataCanvas = document.getElementById('dataChart');
-    const dataCtx = dataCanvas.getContext('2d');
-
     let icdData = [];
-    let favorites = JSON.parse(localStorage.getItem('icdFav_v5') || '[]');
-    let currentResults = [];
+    let favorites = JSON.parse(localStorage.getItem('icdFav_v3') || '[]');
+    let searchTimer;
 
-    // 背景動態
-    function initBg() {
-        bgCanvas.width = window.innerWidth;
-        bgCanvas.height = window.innerHeight;
-        const particles = Array.from({length: 30}, () => ({
-            x: Math.random() * bgCanvas.width,
-            y: Math.random() * bgCanvas.height,
-            s: Math.random() * 1.5 + 0.5
-        }));
-
-        function animate() {
-            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
-            bgCtx.fillStyle = 'rgba(0, 210, 255, 0.2)';
-            particles.forEach(p => {
-                p.y -= p.s;
-                if (p.y < 0) p.y = bgCanvas.height;
-                bgCtx.beginPath(); bgCtx.arc(p.x, p.y, p.s, 0, Math.PI*2); bgCtx.fill();
-            });
-            requestAnimationFrame(animate);
-        }
-        animate();
-    }
-
-    // Canvas 響應式繪圖
-    function drawTechChart(data) {
-        const container = dataCanvas.parentElement;
-        // 根據容器寬度動態調整 Canvas 解析度
-        dataCanvas.width = container.clientWidth * 2;
-        dataCanvas.height = 200 * 2;
-        dataCtx.scale(2, 2);
-
-        const stats = {};
-        data.slice(0, 30).forEach(item => { stats[item.code[0]] = (stats[item.code[0]] || 0) + 1; });
-        const keys = Object.keys(stats);
-        const maxVal = Math.max(...Object.values(stats)) || 1;
-
-        dataCtx.clearRect(0, 0, dataCanvas.width, dataCanvas.height);
-        keys.forEach((key, i) => {
-            const h = (stats[key] / maxVal) * 120;
-            const barW = Math.min(25, (container.clientWidth / keys.length) - 10);
-            const x = 30 + (i * (barW + 15));
-
-            let grad = dataCtx.createLinearGradient(0, 160, 0, 160-h);
-            grad.addColorStop(0, 'rgba(0, 210, 255, 0.8)');
-            grad.addColorStop(1, 'var(--accent-blue)');
-
-            dataCtx.fillStyle = grad;
-            dataCtx.roundRect ? dataCtx.fillRoundedRect(x, 160-h, barW, h, 4) : dataCtx.fillRect(x, 160-h, barW, h);
-
-            dataCtx.fillStyle = '#666';
-            dataCtx.font = '10px monospace';
-            dataCtx.fillText(key, x + (barW/4), 175);
-        });
-    }
-
-    // 輔助函式：圓角矩形 (部分瀏覽器支援)
-    CanvasRenderingContext2D.prototype.fillRoundedRect = function(x, y, w, h, r) {
-        this.beginPath();
-        this.moveTo(x + r, y);
-        this.arcTo(x + w, y, x + w, y + h, r);
-        this.arcTo(x + w, y + h, x, y + h, r);
-        this.arcTo(x, y + h, x, y, r);
-        this.arcTo(x, y, x + w, y, r);
-        this.closePath();
-        this.fill();
-    };
-
-    function performSearch(q) {
-        const query = q.toLowerCase();
-        currentResults = icdData.filter(item =>
-            item.code.toLowerCase().includes(query) || item.zh.includes(query) || item.en.toLowerCase().includes(query)
-        ).slice(0, 15);
-
-        const tbody = document.getElementById('resultBody');
-        tbody.innerHTML = currentResults.map(item => {
-            const isFav = favorites.some(f => f.code === item.code);
-            return `
-                <tr>
-                    <td onclick="toggleFav('${item.code}')" style="cursor:pointer; font-size:18px; color:${isFav?'var(--tech-pink)':'#ccc'}">✦</td>
-                    <td><span class="code-pill">${item.code}</span></td>
-                    <td>
-                        <div style="font-weight:700; font-size:14px;">${item.zh}</div>
-                        <div style="font-size:11px; color:#777; font-family:monospace;">${item.en}</div>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-        drawTechChart(currentResults);
-        renderFavs();
-    }
-
-    function toggleFav(code) {
-        const idx = favorites.findIndex(f => f.code === code);
-        if(idx > -1) favorites.splice(idx, 1);
-        else favorites.unshift(icdData.find(i => i.code === code));
-        localStorage.setItem('icdFav_v5', JSON.stringify(favorites));
-        performSearch(document.getElementById('searchInput').value);
-    }
-
-    function renderFavs() {
-        const list = document.getElementById('favList');
-        if (favorites.length === 0) { list.innerHTML = '<div style="font-size:12px; opacity:0.5;">無項目</div>'; return; }
-        list.innerHTML = favorites.map(f => `
-            <div class="fav-item">
-                <span><b>${f.code}</b> ${f.zh.slice(0,10)}</span>
-                <span onclick="toggleFav('${f.code}')" style="cursor:pointer">×</span>
-            </div>
-        `).join('');
-    }
-
-    // 視窗調整大小處理
-    window.addEventListener('resize', () => {
-        initBg();
-        drawTechChart(currentResults);
-    });
-
+    // 1. 初始化資料
     fetch('icd10_codes_combined.json')
         .then(res => res.json())
         .then(data => {
             icdData = data;
-            document.getElementById('count').innerText = data.length.toLocaleString();
-            initBg(); performSearch('');
-        })
-        .catch(() => {
-            icdData = [{code:"DEMO", zh:"測試數據", en:"Demo Data"}];
-            initBg(); performSearch('');
+            document.getElementById('totalCount').innerText = data.length.toLocaleString();
+            renderFavorites();
+            performSearch('');
         });
 
-    document.getElementById('searchInput').addEventListener('input', (e) => performSearch(e.target.value));
+    // 2. 搜尋與渲染
+    function performSearch(q) {
+        const query = q.toLowerCase().trim();
+        const results = query === ''
+            ? icdData.slice(0, 12)
+            : icdData.filter(item =>
+                item.code.toLowerCase().includes(query) ||
+                item.en.toLowerCase().includes(query) ||
+                item.zh.includes(query)
+              ).slice(0, 50);
+
+        renderTable(results);
+    }
+
+    function renderTable(data) {
+        const tbody = document.getElementById('resultBody');
+        const noRes = document.getElementById('noResult');
+
+        if (data.length === 0) {
+            tbody.innerHTML = '';
+            noRes.style.display = 'block';
+            return;
+        }
+
+        noRes.style.display = 'none';
+        tbody.innerHTML = data.map(item => {
+            const isFav = favorites.some(f => f.code === item.code);
+            return `
+                <tr>
+                    <td><span class="star ${isFav?'active':''}" onclick="toggleFav('${item.code}')">★</span></td>
+                    <td class="code-cell">${item.code}</td>
+                    <td>
+                        <div class="zh-name">${item.zh}</div>
+                        <div class="en-name">${item.en}</div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    // 3. 收藏邏輯
+    function toggleFav(code) {
+        const index = favorites.findIndex(f => f.code === code);
+        if (index > -1) {
+            favorites.splice(index, 1);
+        } else {
+            const item = icdData.find(i => i.code === code);
+            if (item) favorites.unshift(item);
+        }
+
+        localStorage.setItem('icdFav_v3', JSON.stringify(favorites));
+        renderFavorites();
+        performSearch(document.getElementById('searchInput').value);
+    }
+
+    function renderFavorites() {
+        const container = document.getElementById('favList');
+        if (favorites.length === 0) {
+            container.innerHTML = '<div style="color:var(--text-muted); font-size:14px; text-align:center; padding:20px;">尚無釘選項目</div>';
+            return;
+        }
+
+        container.innerHTML = favorites.map(item => `
+            <div class="fav-item">
+                <div class="fav-item-info">
+                    <span class="fav-item-code">${item.code}</span>
+                    <div style="font-size:13px; margin-top:3px;">${item.zh}</div>
+                </div>
+                <span class="remove-fav" onclick="toggleFav('${item.code}')">✕</span>
+            </div>
+        `).join('');
+    }
+
+    // 4. 防抖
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => performSearch(e.target.value), 200);
+    });
 </script>
+
 </body>
 </html>
