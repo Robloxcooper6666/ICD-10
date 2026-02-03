@@ -16,50 +16,50 @@
             --danger: #ef4444;       /* 警告紅 */
         }
 
-        body { 
-            font-family: 'Inter', system-ui, -apple-system, sans-serif; 
-            margin: 0; 
-            background-color: var(--bg-deep); 
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            background-color: var(--bg-deep);
             color: var(--text-main);
             line-height: 1.5;
         }
 
         /* 佈局容器 */
-        .main-layout { 
-            display: flex; 
-            max-width: 1400px; 
-            margin: 30px auto; 
-            gap: 25px; 
-            padding: 0 20px; 
+        .main-layout {
+            display: flex;
+            max-width: 1400px;
+            margin: 30px auto;
+            gap: 25px;
+            padding: 0 20px;
         }
 
         /* 左側搜尋區 */
-        .search-section { 
-            flex: 2; 
-            background: var(--card-bg); 
-            padding: 30px; 
-            border-radius: 16px; 
+        .search-section {
+            flex: 2;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.3);
             border: 1px solid #334155;
         }
 
         /* 右側收藏區 */
-        .fav-section { 
-            flex: 1; 
-            background: #111827; 
-            padding: 25px; 
-            border-radius: 16px; 
+        .fav-section {
+            flex: 1;
+            background: #111827;
+            padding: 25px;
+            border-radius: 16px;
             border: 2px solid var(--accent);
-            height: fit-content; 
-            position: sticky; 
-            top: 20px; 
+            height: fit-content;
+            position: sticky;
+            top: 20px;
             min-width: 320px;
         }
 
         h2 { color: var(--accent); margin-top: 0; font-size: 24px; letter-spacing: 1px; }
         h3 { color: var(--fav-star); margin-top: 0; display: flex; align-items: center; gap: 8px; }
 
-        .stats-info { 
+        .stats-info {
             background: rgba(14, 165, 233, 0.1);
             color: var(--accent);
             padding: 8px 15px;
@@ -70,41 +70,41 @@
         }
 
         /* 輸入框強化 */
-        input { 
-            width: 100%; 
-            padding: 15px; 
+        input {
+            width: 100%;
+            padding: 15px;
             background: #0f172a;
             border: 2px solid #334155;
-            border-radius: 10px; 
-            font-size: 18px; 
+            border-radius: 10px;
+            font-size: 18px;
             color: white;
             margin-bottom: 20px;
             transition: all 0.3s ease;
         }
-        input:focus { 
-            outline: none; 
-            border-color: var(--accent); 
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
             box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
         }
 
         /* 表格反差樣式 */
         table { width: 100%; border-collapse: collapse; }
-        th { 
-            text-align: left; 
-            padding: 15px; 
-            border-bottom: 2px solid #334155; 
+        th {
+            text-align: left;
+            padding: 15px;
+            border-bottom: 2px solid #334155;
             color: var(--text-muted);
             text-transform: uppercase;
             font-size: 12px;
             letter-spacing: 1px;
         }
         td { padding: 18px 15px; border-bottom: 1px solid #334155; }
-        
+
         tr:hover { background: rgba(255,255,255,0.03); }
 
-        .code-cell { 
-            font-family: 'JetBrains Mono', 'Courier New', monospace; 
-            font-weight: 800; 
+        .code-cell {
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-weight: 800;
             color: var(--highlight);
             font-size: 1.1em;
         }
@@ -113,10 +113,10 @@
         .en-name { font-size: 13px; color: var(--text-muted); font-style: italic; }
 
         /* 星星按鈕 */
-        .star { 
-            cursor: pointer; 
-            font-size: 24px; 
-            color: #334155; 
+        .star {
+            cursor: pointer;
+            font-size: 24px;
+            color: #334155;
             transition: transform 0.2s;
             display: inline-block;
         }
@@ -124,11 +124,11 @@
         .star:hover { transform: scale(1.2); }
 
         /* 收藏列表項目 */
-        .fav-item { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 15px; 
+        .fav-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
             background: rgba(255,255,255,0.05);
             border-radius: 8px;
             margin-bottom: 10px;
@@ -152,9 +152,9 @@
     <div class="search-section">
         <h2>ICD-10 診斷代碼核心</h2>
         <div class="stats-info">SYSTEM READY: <span id="totalCount">...</span> CODES LOADED</div>
-        
+
         <input type="text" id="searchInput" placeholder="搜尋代碼、疾病名稱 (中英文)...">
-        
+
         <table>
             <thead>
                 <tr>
@@ -194,11 +194,11 @@
     // 2. 搜尋與渲染
     function performSearch(q) {
         const query = q.toLowerCase().trim();
-        const results = query === '' 
-            ? icdData.slice(0, 12) 
-            : icdData.filter(item => 
-                item.code.toLowerCase().includes(query) || 
-                item.en.toLowerCase().includes(query) || 
+        const results = query === ''
+            ? icdData.slice(0, 12)
+            : icdData.filter(item =>
+                item.code.toLowerCase().includes(query) ||
+                item.en.toLowerCase().includes(query) ||
                 item.zh.includes(query)
               ).slice(0, 50);
 
@@ -208,13 +208,13 @@
     function renderTable(data) {
         const tbody = document.getElementById('resultBody');
         const noRes = document.getElementById('noResult');
-        
+
         if (data.length === 0) {
             tbody.innerHTML = '';
             noRes.style.display = 'block';
             return;
         }
-        
+
         noRes.style.display = 'none';
         tbody.innerHTML = data.map(item => {
             const isFav = favorites.some(f => f.code === item.code);
@@ -240,7 +240,7 @@
             const item = icdData.find(i => i.code === code);
             if (item) favorites.unshift(item);
         }
-        
+
         localStorage.setItem('icdFav_v3', JSON.stringify(favorites));
         renderFavorites();
         performSearch(document.getElementById('searchInput').value);
@@ -273,4 +273,3 @@
 
 </body>
 </html>
-
