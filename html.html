@@ -3,28 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICD-10 疾病查詢系統</title>
+    <title>ICD-10 查詢系統</title>
     <style>
         :root {
-            --bg-deep: #0f172a;       /* 深藍黑背景 */
-            --card-bg: #1e293b;      /* 卡片深灰色 */
-            --accent: #0ea5e9;       /* 亮藍色 */
-            --text-main: #f8fafc;    /* 近純白文字 */
-            --text-muted: #94a3b8;   /* 灰色文字 */
-            --highlight: #f472b6;    /* 螢光粉 (代碼用) */
-            --fav-star: #fbbf24;     /* 亮黃色星星 */
-            --danger: #ef4444;       /* 警告紅 */
+            --bg-deep: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #0ea5e9;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --highlight: #f472b6;
+            --fav-star: #fbbf24;
+            --danger: #ef4444;
+            --success: #22c55e;
         }
 
         body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-family: 'Inter', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
             margin: 0;
             background-color: var(--bg-deep);
             color: var(--text-main);
             line-height: 1.5;
         }
 
-        /* 佈局容器 */
         .main-layout {
             display: flex;
             max-width: 1400px;
@@ -33,7 +33,6 @@
             padding: 0 20px;
         }
 
-        /* 左側搜尋區 */
         .search-section {
             flex: 2;
             background: var(--card-bg);
@@ -43,7 +42,6 @@
             border: 1px solid #334155;
         }
 
-        /* 右側收藏區 */
         .fav-section {
             flex: 1;
             background: #111827;
@@ -56,20 +54,33 @@
             min-width: 320px;
         }
 
+        /* 更新日誌區塊 */
+        .update-log {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            border-left: 3px solid var(--highlight);
+        }
+        .update-item { color: var(--text-muted); margin-bottom: 4px; }
+        .update-date { color: var(--highlight); font-weight: bold; margin-right: 8px; }
+
         h2 { color: var(--accent); margin-top: 0; font-size: 24px; letter-spacing: 1px; }
         h3 { color: var(--fav-star); margin-top: 0; display: flex; align-items: center; gap: 8px; }
 
         .stats-info {
             background: rgba(14, 165, 233, 0.1);
             color: var(--accent);
-            padding: 8px 15px;
+            padding: 10px 15px;
             border-radius: 8px;
             font-size: 0.9em;
             margin-bottom: 20px;
             border-left: 4px solid var(--accent);
+            display: flex;
+            justify-content: space-between;
         }
 
-        /* 輸入框強化 */
         input {
             width: 100%;
             padding: 15px;
@@ -80,6 +91,7 @@
             color: white;
             margin-bottom: 20px;
             transition: all 0.3s ease;
+            box-sizing: border-box;
         }
         input:focus {
             outline: none;
@@ -87,7 +99,6 @@
             box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
         }
 
-        /* 表格反差樣式 */
         table { width: 100%; border-collapse: collapse; }
         th {
             text-align: left;
@@ -96,53 +107,51 @@
             color: var(--text-muted);
             text-transform: uppercase;
             font-size: 12px;
-            letter-spacing: 1px;
         }
         td { padding: 18px 15px; border-bottom: 1px solid #334155; }
-
         tr:hover { background: rgba(255,255,255,0.03); }
 
         .code-cell {
-            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-family: 'JetBrains Mono', monospace;
             font-weight: 800;
             color: var(--highlight);
-            font-size: 1.1em;
         }
 
         .zh-name { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 4px; }
         .en-name { font-size: 13px; color: var(--text-muted); font-style: italic; }
 
-        /* 星星按鈕 */
         .star {
             cursor: pointer;
             font-size: 24px;
             color: #334155;
-            transition: transform 0.2s;
-            display: inline-block;
+            transition: 0.2s;
         }
-        .star.active { color: var(--fav-star); filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.5)); }
+        .star.active { color: var(--fav-star); }
         .star:hover { transform: scale(1.2); }
 
-        /* 收藏列表項目 */
         .fav-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px;
+            padding: 12px;
             background: rgba(255,255,255,0.05);
             border-radius: 8px;
             margin-bottom: 10px;
             border-left: 3px solid var(--fav-star);
         }
-        .fav-item-info { flex: 1; }
-        .fav-item-code { font-weight: bold; color: var(--highlight); margin-right: 10px; }
-        .remove-fav { color: #475569; cursor: pointer; font-size: 18px; }
+        .fav-item-code { font-weight: bold; color: var(--highlight); margin-right: 8px; }
+        .remove-fav { color: #475569; cursor: pointer; padding: 5px; }
         .remove-fav:hover { color: var(--danger); }
 
-        /* 響應式 */
+        .loading-dots:after {
+            content: '.';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+        @keyframes dots { 0%, 20% { color: rgba(0,0,0,0); text-shadow: .2em 0 0 rgba(0,0,0,0), .4em 0 0 rgba(0,0,0,0); } 40% { color: var(--accent); text-shadow: .2em 0 0 rgba(0,0,0,0), .4em 0 0 rgba(0,0,0,0); } 60% { text-shadow: .2em 0 0 var(--accent), .4em 0 0 rgba(0,0,0,0); } 80%, 100% { text-shadow: .2em 0 0 var(--accent), .4em 0 0 var(--accent); } }
+
         @media (max-width: 1000px) {
             .main-layout { flex-direction: column; }
-            .fav-section { position: static; order: -1; min-width: auto; }
+            .fav-section { position: static; order: -1; }
         }
     </style>
 </head>
@@ -150,76 +159,98 @@
 
 <div class="main-layout">
     <div class="search-section">
-        <h2>ICD-10 診斷代碼核心</h2>
-        <div class="stats-info" id="statusMessage">正在串連遠端資料庫 (GitHub Raw)...</div>
+        <h2>ICD-10 診斷查詢系統</h2>
 
-        <input type="text" id="searchInput" placeholder="搜尋關鍵字，多組請用空格區隔 (如：骨折 鎖骨)">
+        <div class="update-log">
+            <div class="update-item">
+                <span class="update-date">2026/2/4 10:47</span>
+                搜尋功能優化：獲取資料庫方式改為直接獲取，不經過 https://raw.githubusercontent.com/Robloxcooper6666<br>/ICD-10/main/icd10_codes_combined.json
+            </div>
+        </div>
+
+        <div class="stats-info" id="statusBox">
+            <span id="statusMessage" class="loading-dots">正在讀取資料庫檔案</span>
+            <span id="dataCount"></span>
+        </div>
+
+        <input type="text" id="searchInput" placeholder="搜尋代碼、中文或英文關鍵字 (多組用空格隔開)..." autofocus>
 
         <table>
             <thead>
                 <tr>
-                    <th width="50">收藏</th>
-                    <th width="100">代碼</th>
+                    <th width="50">釘選</th>
+                    <th width="120">代碼</th>
                     <th>診斷名稱 (中/英)</th>
                 </tr>
             </thead>
             <tbody id="resultBody"></tbody>
         </table>
-        <div id="noResult" style="display:none; text-align:center; padding:40px; color:var(--text-muted);">未找到匹配的診斷數據</div>
+        <div id="noResult" style="display:none; text-align:center; padding:40px; color:var(--text-muted);">
+            找不到相符的診斷代碼
+        </div>
     </div>
 
     <div class="fav-section">
-        <h3>⭐ 已釘選收藏</h3>
-        <div id="favList">
-            <div style="color:var(--text-muted); font-size:14px; text-align:center; padding:20px;">尚無釘選項目</div>
-        </div>
+        <h3>⭐ 我的收藏庫</h3>
+        <div id="favList"></div>
     </div>
 </div>
 
 <script>
     let icdData = [];
-    let favorites = JSON.parse(localStorage.getItem('icdFav_v3') || '[]');
+    let favorites = JSON.parse(localStorage.getItem('icd_fav_v4') || '[]');
     let searchTimer;
 
-    // 1. 初始化資料：串連 GitHub Raw 連結
     async function init() {
-        const statusMsg = document.getElementById('statusMessage');
-        // 使用 GitHub Raw 連結
-        const githubUrl = 'https://raw.githubusercontent.com/Robloxcooper6666/ICD-10/main/icd10_codes_combined.json';
-        
+        const msg = document.getElementById('statusMessage');
+        const count = document.getElementById('dataCount');
+
         try {
-            const res = await fetch(githubUrl);
-            if (!res.ok) throw new Error('無法存取遠端檔案');
-            
-            icdData = await res.json();
-            statusMsg.innerHTML = `遠端連線成功: <span style="font-weight:bold">${icdData.length.toLocaleString()}</span> 筆診斷代碼已載入`;
-        } catch (e) {
-            console.error("資料載入失敗:", e);
-            statusMsg.innerHTML = `<span style="color:var(--danger)">⚠️ 遠端 Raw 串連失敗，請確認檔案路徑是否正確</span>`;
-            
-            // 預設演示資料
-            icdData = [
-                {code: "S42.009A", zh: "鎖骨骨折，閉鎖性", en: "Fracture of clavicle, closed"},
-                {code: "M19.011", zh: "肩關節骨關節炎", en: "Primary osteoarthritis, right shoulder"}
-            ];
+            // 改為相對路徑讀取，不使用 external github 連結
+            const response = await fetch('./icd10_codes_combined.json');
+            if (!response.ok) throw new Error('無法讀取 JSON 檔案，請確認檔案是否存在於同目錄');
+
+            icdData = await response.json();
+
+            msg.innerText = "✅ 直接獲取模式：資料庫連線正常";
+            msg.style.color = "var(--success)";
+            count.innerText = `共 ${icdData.length.toLocaleString()} 筆`;
+        } catch (err) {
+            msg.innerHTML = "❌ 讀取失敗：請確認 JSON 檔案路徑或透過伺服器環境開啟";
+            msg.style.color = "var(--danger)";
+            console.error(err);
         }
-        
+
         renderFavorites();
         performSearch('');
     }
 
-    // 2. 強化搜尋與渲染 (支援多關鍵字)
-    function performSearch(q) {
-        const keywords = q.toLowerCase().trim().split(/\s+/).filter(k => k.length > 0);
-        
-        let results;
+    function performSearch(query) {
+        const keywords = query.toLowerCase().trim().split(/\s+/).filter(k => k !== "");
+        let results = [];
+
         if (keywords.length === 0) {
-            results = icdData.slice(0, 15);
+            results = icdData.slice(0, 20);
         } else {
             results = icdData.filter(item => {
-                const searchContent = `${item.code} ${item.zh} ${item.en}`.toLowerCase();
-                return keywords.every(kw => searchContent.includes(kw));
-            }).slice(0, 50);
+                const code = (item.code || "").toLowerCase();
+                const zh = (item.zh || "").toLowerCase();
+                const en = (item.en || "").toLowerCase();
+
+                return keywords.every(kw =>
+                    code.includes(kw) || zh.includes(kw) || en.includes(kw)
+                );
+            });
+
+            results.sort((a, b) => {
+                const firstKw = keywords[0];
+                if (a.code.toLowerCase() === firstKw) return -1;
+                if (b.code.toLowerCase() === firstKw) return 1;
+                if (a.code.toLowerCase().startsWith(firstKw)) return -1;
+                return 0;
+            });
+
+            results = results.slice(0, 100);
         }
 
         renderTable(results);
@@ -236,22 +267,31 @@
         }
 
         noRes.style.display = 'none';
-        tbody.innerHTML = data.map(item => {
+        const fragment = document.createDocumentFragment();
+
+        data.forEach(item => {
             const isFav = favorites.some(f => f.code === item.code);
-            return `
-                <tr>
-                    <td><span class="star ${isFav?'active':''}" onclick="toggleFav('${item.code}')">★</span></td>
-                    <td class="code-cell">${item.code}</td>
-                    <td>
-                        <div class="zh-name">${item.zh || '無中文名稱'}</div>
-                        <div class="en-name">${item.en || 'No English Name'}</div>
-                    </td>
-                </tr>
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><span class="star ${isFav ? 'active' : ''}" data-code="${item.code}">★</span></td>
+                <td class="code-cell">${item.code}</td>
+                <td>
+                    <div class="zh-name">${item.zh || '---'}</div>
+                    <div class="en-name">${item.en || '---'}</div>
+                </td>
             `;
-        }).join('');
+
+            tr.querySelector('.star').addEventListener('click', (e) => {
+                toggleFav(item.code);
+            });
+
+            fragment.appendChild(tr);
+        });
+
+        tbody.innerHTML = '';
+        tbody.appendChild(fragment);
     }
 
-    // 3. 收藏邏輯
     function toggleFav(code) {
         const index = favorites.findIndex(f => f.code === code);
         if (index > -1) {
@@ -261,9 +301,12 @@
             if (item) favorites.unshift(item);
         }
 
-        localStorage.setItem('icdFav_v3', JSON.stringify(favorites));
+        localStorage.setItem('icd_fav_v4', JSON.stringify(favorites));
         renderFavorites();
-        performSearch(document.getElementById('searchInput').value);
+
+        document.querySelectorAll(`.star[data-code="${code}"]`).forEach(s => {
+            s.classList.toggle('active');
+        });
     }
 
     function renderFavorites() {
@@ -275,9 +318,9 @@
 
         container.innerHTML = favorites.map(item => `
             <div class="fav-item">
-                <div class="fav-item-info">
+                <div style="flex:1">
                     <span class="fav-item-code">${item.code}</span>
-                    <div style="font-size:13px; margin-top:3px;">${item.zh}</div>
+                    <div style="font-size:13px; color:var(--text-main); margin-top:2px;">${item.zh}</div>
                 </div>
                 <span class="remove-fav" onclick="toggleFav('${item.code}')">✕</span>
             </div>
@@ -286,12 +329,10 @@
 
     document.getElementById('searchInput').addEventListener('input', (e) => {
         clearTimeout(searchTimer);
-        searchTimer = setTimeout(() => performSearch(e.target.value), 200);
+        searchTimer = setTimeout(() => performSearch(e.target.value), 250);
     });
 
     init();
 </script>
-
 </body>
 </html>
-
