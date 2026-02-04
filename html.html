@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICD-10 智慧分層查詢系統</title>
+    <title>ICD-10 智慧分層查詢系統V2.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -18,242 +18,363 @@
             background-color: var(--bg-deep);
             color: var(--text-main);
             font-family: 'Inter', 'PingFang TC', sans-serif;
+            overflow-x: hidden;
         }
         .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         .code-font { font-family: 'JetBrains Mono', monospace; }
-        .expand-transition { transition: max-height 0.3s ease-out, opacity 0.2s; }
-        .item-row:hover { background: rgba(255,255,255,0.03); }
+        
+        .tab-active {
+            background: var(--accent);
+            color: white !important;
+            border-radius: 0.5rem;
+        }
+
+        /* 樹狀分支連接線 */
+        .branch-line {
+            position: relative;
+            transition: all 0.3s ease-in-out;
+        }
+        .branch-line::before {
+            content: '';
+            position: absolute;
+            left: -1.5rem;
+            top: 0;
+            bottom: 1.5rem;
+            width: 2px;
+            background: #334155;
+        }
+        .branch-item::after {
+            content: '';
+            position: absolute;
+            left: -1.5rem;
+            top: 1.2rem;
+            width: 1rem;
+            height: 2px;
+            background: #334155;
+        }
+
         .active-star { color: var(--fav-star) !important; text-shadow: 0 0 8px rgba(251, 191, 36, 0.4); }
+        
+        /* 字母導航 */
+        .letter-btn {
+            padding: 0.25rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            transition: all 0.2s;
+        }
+        .letter-btn:hover, .letter-btn.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .animate-fadeIn { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* 摺疊動畫 */
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, opacity 0.3s;
+            opacity: 0;
+        }
+        .collapsible-content.expanded {
+            max-height: 2000px; /* 大約高度，足以容納多個子項 */
+            opacity: 1;
+        }
+        .rotate-icon {
+            transition: transform 0.3s;
+        }
+        .rotate-icon.active {
+            transform: rotate(180deg);
+        }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="p-0 flex flex-col h-screen">
 
-<div class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8">
-    
-    <!-- 左側：搜尋與結果 -->
-    <div class="flex-1 bg-[#1e293b] rounded-2xl p-6 shadow-2xl border border-slate-700">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-sky-400 tracking-tight">ICD-10 智慧檢索</h2>
-            <div id="statusTag" class="text-xs px-3 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">連線中...</div>
-        </div>
-
-        <div class="relative mb-6">
-            <input type="text" id="searchInput" 
-                class="w-full bg-slate-900 border-2 border-slate-700 rounded-xl px-5 py-4 text-lg focus:outline-none focus:border-sky-500 transition-all placeholder:text-slate-500"
-                placeholder="輸入代碼、中英文關鍵字... (多關鍵字請用空格)">
-            <div class="absolute right-4 top-4 text-slate-500 pointer-events-none">
-                <kbd class="bg-slate-800 px-2 py-1 rounded border border-slate-600 text-xs">Enter</kbd>
+<!-- 頂部導覽列 -->
+<nav class="bg-slate-900 border-b border-slate-800 shrink-0 z-50 shadow-xl">
+    <div class="max-w-7xl mx-auto px-6 py-3">
+        <div class="flex justify-between items-center mb-3">
+            <h1 class="text-xl font-bold text-sky-400">ICD-10 智慧系統</h1>
+            <div class="flex bg-slate-800 rounded-lg p-1 gap-1">
+                <button onclick="switchTab('search')" id="tabSearch" class="px-4 py-1.5 text-sm font-medium tab-active">🔍 搜尋</button>
+                <button onclick="switchTab('category')" id="tabCategory" class="px-4 py-1.5 text-sm font-medium text-slate-400 hover:text-white">🗂️ 類別瀏覽</button>
+                <button onclick="switchTab('favorites')" id="tabFavs" class="px-4 py-1.5 text-sm font-medium text-slate-400 hover:text-white">⭐ 我的最愛</button>
             </div>
         </div>
-
-        <!-- 結果表格 -->
-        <div class="overflow-hidden rounded-xl border border-slate-700 bg-slate-900/50">
-            <table class="w-full text-left border-collapse">
-                <thead class="bg-slate-800/50 text-slate-400 text-xs uppercase tracking-wider">
-                    <tr>
-                        <th class="px-4 py-3 w-12 text-center">⭐</th>
-                        <th class="px-4 py-3 w-32">代碼 (熱度)</th>
-                        <th class="px-4 py-3">診斷名稱</th>
-                    </tr>
-                </thead>
-                <tbody id="resultBody" class="divide-y divide-slate-800">
-                    <!-- 動態生成 -->
-                </tbody>
-            </table>
-            <div id="loading" class="py-20 text-center text-slate-500">
-                <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-sky-500 border-t-transparent mb-4"></div>
-                <p>正在從 GitHub 載入資料庫...</p>
-            </div>
+        <!-- 字母索引列 -->
+        <div id="letterNav" class="flex flex-wrap gap-1 border-t border-slate-800 pt-3 hidden">
+            <!-- A-Z 字母由 JS 生成 -->
         </div>
     </div>
+</nav>
 
-    <!-- 右側：智慧收藏庫 (分類顯示) -->
-    <div class="w-full lg:w-96 flex flex-col gap-6">
-        <div class="bg-slate-900 border-2 border-sky-500/50 rounded-2xl p-5 shadow-xl sticky top-8">
-            <div class="flex items-center gap-2 mb-4">
-                <span class="text-xl">⭐</span>
-                <h3 class="text-lg font-bold text-amber-400">智慧收藏庫 (分類)</h3>
+<div class="flex-1 overflow-y-auto custom-scroll p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        
+        <!-- 頁籤一：搜尋頁面 -->
+        <div id="pageSearch" class="space-y-6">
+            <div class="bg-[#1e293b] rounded-2xl p-6 shadow-2xl border border-slate-700">
+                <input type="text" id="searchInput" 
+                    class="w-full bg-slate-900 border-2 border-slate-700 rounded-xl px-5 py-4 text-lg focus:outline-none focus:border-sky-500 transition-all text-white"
+                    placeholder="輸入診斷名稱或代碼...">
+                <div id="searchTree" class="mt-8 space-y-6">
+                    <!-- 搜尋結果將以樹狀顯示 -->
+                </div>
             </div>
-            
-            <div id="favContainer" class="custom-scroll overflow-y-auto max-h-[70vh] space-y-3">
-                <!-- 自動分類後的收藏項 -->
+        </div>
+
+        <!-- 頁籤二：類別瀏覽 -->
+        <div id="pageCategory" class="hidden animate-fadeIn space-y-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="currentCategoryTitle" class="text-3xl font-bold text-sky-400">請選擇開頭字母</h2>
+                <div class="flex gap-4">
+                    <button onclick="expandAllGroups(true)" class="text-sm bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg border border-slate-600">全部展開</button>
+                    <button onclick="expandAllGroups(false)" class="text-sm bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg border border-slate-600">全部收合</button>
+                </div>
             </div>
-            
-            <div id="noFavHint" class="text-center py-10 text-slate-500 text-sm">
-                目前沒有收藏項目<br>點擊星星進行標記
+            <div id="categoryTree" class="space-y-8">
+                <!-- 根據選擇字母生成的樹狀分支 -->
             </div>
+        </div>
+
+        <!-- 頁籤三：我的最愛 -->
+        <div id="pageFavorites" class="hidden animate-fadeIn space-y-6">
+            <div class="bg-slate-900 border-2 border-sky-500/30 rounded-2xl p-6">
+                <h3 class="text-2xl font-bold text-amber-400 mb-6 flex items-center gap-2">⭐ 我的收藏清單</h3>
+                <div id="favList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                <div id="noFavHint" class="text-center py-20 text-slate-500">尚無收藏項目</div>
+            </div>
+        </div>
+
+        <div id="loading" class="py-20 text-center text-slate-500">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-sky-500 border-t-transparent mb-4"></div>
+            <p>正在初始化雲端資料庫...</p>
         </div>
     </div>
 </div>
 
 <!-- 複製提示 -->
-<div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 transition-opacity pointer-events-none z-50 font-bold">
+<div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-sky-500 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 transition-opacity pointer-events-none z-50 font-bold">
     已複製代碼！
 </div>
 
 <script>
     const DATA_URL = 'https://raw.githubusercontent.com/Robloxcooper6666/ICD-10/main/icd10_codes_combined.json';
     let icdData = [];
-    let favorites = JSON.parse(localStorage.getItem('icd_fav_v5') || '[]');
-    let clickCounts = JSON.parse(localStorage.getItem('icd_clicks_v5') || '{}');
+    let favorites = JSON.parse(localStorage.getItem('icd_fav_tree_v3') || '[]');
+    let currentLetter = '';
 
-    // 初始化
     async function init() {
         try {
             const res = await fetch(DATA_URL);
             icdData = await res.json();
             document.getElementById('loading').style.display = 'none';
-            document.getElementById('statusTag').innerText = `已連線: ${icdData.length.toLocaleString()} 筆`;
-            document.getElementById('statusTag').classList.add('text-green-400');
-            
-            renderTable('');
+            initLetterNav();
+            switchTab('search');
             renderFavorites();
         } catch (err) {
-            document.getElementById('loading').innerText = '載入失敗，請檢查網路連接。';
+            document.getElementById('loading').innerText = '資料載入失敗。';
         }
     }
 
-    // 搜尋與分層處理
-    function renderTable(query) {
-        const tbody = document.getElementById('resultBody');
-        const keywords = query.toLowerCase().trim().split(/\s+/).filter(k => k);
+    function initLetterNav() {
+        const nav = document.getElementById('letterNav');
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+        nav.innerHTML = letters.map(l => `
+            <button onclick="selectLetter('${l}')" class="letter-btn" id="btn-letter-${l}">${l}</button>
+        `).join('');
+    }
+
+    function selectLetter(l) {
+        currentLetter = l;
+        document.querySelectorAll('.letter-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(`btn-letter-${l}`).classList.add('active');
+        document.getElementById('currentCategoryTitle').innerText = `開頭為 ${l} 的診斷類別`;
+        renderCategoryTree(l);
+    }
+
+    function switchTab(tab) {
+        const pages = ['pageSearch', 'pageCategory', 'pageFavorites'];
+        const tabs = ['tabSearch', 'tabCategory', 'tabFavs'];
+        const letterNav = document.getElementById('letterNav');
+
+        pages.forEach(p => document.getElementById(p).classList.add('hidden'));
+        tabs.forEach(t => document.getElementById(t).classList.remove('tab-active', 'text-slate-400'));
         
-        let filtered = icdData;
-        if (keywords.length > 0) {
-            filtered = icdData.filter(item => {
-                const searchStr = `${item.code} ${item.zh} ${item.en}`.toLowerCase();
-                return keywords.every(kw => searchStr.includes(kw));
-            });
+        if (tab === 'search') {
+            document.getElementById('pageSearch').classList.remove('hidden');
+            document.getElementById('tabSearch').classList.add('tab-active');
+            letterNav.classList.add('hidden');
+        } else if (tab === 'category') {
+            document.getElementById('pageCategory').classList.remove('hidden');
+            document.getElementById('tabCategory').classList.add('tab-active');
+            letterNav.classList.remove('hidden');
+            if(!currentLetter) selectLetter('A');
+        } else {
+            document.getElementById('pageFavorites').classList.remove('hidden');
+            document.getElementById('tabFavs').classList.add('tab-active');
+            letterNav.classList.add('hidden');
+            renderFavorites();
         }
+    }
 
-        // 排序：熱度優先
-        filtered.sort((a, b) => (clickCounts[b.code] || 0) - (clickCounts[a.code] || 0));
+    // 摺疊/展開切換
+    function toggleCollapse(id) {
+        const content = document.getElementById('content-' + id);
+        const icon = document.getElementById('icon-' + id);
+        if (content.classList.contains('expanded')) {
+            content.classList.remove('expanded');
+            icon.classList.remove('active');
+        } else {
+            content.classList.add('expanded');
+            icon.classList.add('active');
+        }
+    }
 
-        // 限制顯示前 100 筆，避免眼花
-        const displayData = filtered.slice(0, 100);
-        
-        tbody.innerHTML = displayData.map(item => {
-            const isFav = favorites.includes(item.code);
-            const count = clickCounts[item.code] || 0;
+    // 核心渲染邏輯
+    function buildTreeHTML(data) {
+        const groups = {};
+        data.forEach(item => {
+            const mainKey = item.code.split('.')[0];
+            if (!groups[mainKey]) groups[mainKey] = { main: null, children: [] };
+            if (item.code === mainKey) groups[mainKey].main = item;
+            else groups[mainKey].children.push(item);
+        });
+
+        const sortedKeys = Object.keys(groups).sort();
+        return sortedKeys.map(key => {
+            const group = groups[key];
+            const main = group.main || { code: key, zh: "未分類大項", en: "" };
+            const isFav = favorites.includes(main.code);
+            const safeId = key.replace('.', '_');
+            
             return `
-                <tr class="item-row group cursor-pointer border-b border-slate-800" onclick="handleAction('${item.code}', '${item.zh}')">
-                    <td class="p-4 text-center">
-                        <button onclick="event.stopPropagation(); toggleFav('${item.code}')" 
-                                class="text-slate-600 hover:text-amber-400 transition-colors ${isFav ? 'active-star' : ''}">
-                            ★
-                        </button>
-                    </td>
-                    <td class="p-4">
-                        <span class="code-font font-bold text-pink-400">${item.code}</span>
-                        ${count > 0 ? `<span class="ml-2 text-[10px] bg-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded">🔥 ${count}</span>` : ''}
-                    </td>
-                    <td class="p-4">
-                        <div class="text-slate-100 font-medium">${item.zh || '---'}</div>
-                        <div class="text-slate-500 text-xs mt-1 truncate max-w-md">${item.en || '---'}</div>
-                    </td>
-                </tr>
+                <div class="category-group bg-slate-800/20 rounded-2xl border border-slate-700/50 p-6 overflow-hidden">
+                    <div class="flex items-center gap-4 cursor-pointer">
+                        <button onclick="toggleFav('${main.code}')" 
+                                class="text-2xl text-slate-600 hover:text-amber-400 ${isFav ? 'active-star' : ''}">★</button>
+                        
+                        <div class="flex-1 flex items-center justify-between" onclick="toggleCollapse('${safeId}')">
+                            <div>
+                                <h4 class="text-xl font-bold text-pink-400 code-font">${main.code}</h4>
+                                <p class="text-slate-100 font-medium">${main.zh}</p>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <div class="text-slate-500 text-xs text-right">
+                                    ${group.children.length} 子項
+                                </div>
+                                <svg id="icon-${safeId}" class="rotate-icon w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    ${group.children.length > 0 ? `
+                        <div id="content-${safeId}" class="collapsible-content">
+                            <div class="mt-6 ml-10 space-y-4 branch-line">
+                                ${group.children.map(sub => `
+                                    <div class="relative branch-item flex items-center gap-3 group">
+                                        <button onclick="toggleFav('${sub.code}')" 
+                                                class="text-sm text-slate-600 hover:text-amber-400 ${favorites.includes(sub.code) ? 'active-star' : ''}">★</button>
+                                        <div onclick="handleAction('${sub.code}', '${sub.zh}')" class="bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-700 group-hover:border-sky-500 transition-all cursor-pointer flex-1 flex justify-between">
+                                            <div>
+                                                <span class="code-font font-bold text-sky-400">${sub.code}</span>
+                                                <span class="ml-3 text-slate-200">${sub.zh}</span>
+                                            </div>
+                                            <span class="text-[10px] text-slate-500 opacity-0 group-hover:opacity-100 italic self-center">點擊複製</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
             `;
         }).join('');
     }
 
-    // 處理點擊、複製、熱度
+    function renderCategoryTree(letter) {
+        const container = document.getElementById('categoryTree');
+        const filtered = icdData.filter(item => item.code.startsWith(letter));
+        container.innerHTML = buildTreeHTML(filtered);
+    }
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        const query = e.target.value.trim().toLowerCase();
+        const tree = document.getElementById('searchTree');
+        if (!query) { tree.innerHTML = ''; return; }
+        const filtered = icdData.filter(item => 
+            item.code.toLowerCase().includes(query) || 
+            item.zh.toLowerCase().includes(query)
+        ).slice(0, 50);
+        tree.innerHTML = buildTreeHTML(filtered);
+        // 搜尋時預設展開
+        expandAllGroups(true);
+    });
+
+    function expandAllGroups(expand) {
+        document.querySelectorAll('.collapsible-content').forEach(el => {
+            if(expand) el.classList.add('expanded');
+            else el.classList.remove('expanded');
+        });
+        document.querySelectorAll('.rotate-icon').forEach(el => {
+            if(expand) el.classList.add('active');
+            else el.classList.remove('active');
+        });
+    }
+
     function handleAction(code, zh) {
-        clickCounts[code] = (clickCounts[code] || 0) + 1;
-        localStorage.setItem('icd_clicks_v5', JSON.stringify(clickCounts));
-        
-        // 複製
         const el = document.createElement('textarea');
         el.value = code;
         document.body.appendChild(el);
         el.select();
         document.execCommand('copy');
         document.body.removeChild(el);
-
-        // Toast
         const toast = document.getElementById('toast');
-        toast.innerText = `已複製 ${code} (${zh})`;
+        toast.innerText = `已複製 ${code}`;
         toast.style.opacity = '1';
         setTimeout(() => toast.style.opacity = '0', 2000);
-
-        // 刷新列表（更新火苗）
-        renderTable(document.getElementById('searchInput').value);
     }
 
-    // 收藏功能
     function toggleFav(code) {
         const idx = favorites.indexOf(code);
         if (idx > -1) favorites.splice(idx, 1);
         else favorites.push(code);
-        
-        localStorage.setItem('icd_fav_v5', JSON.stringify(favorites));
-        renderTable(document.getElementById('searchInput').value);
+        localStorage.setItem('icd_fav_tree_v3', JSON.stringify(favorites));
         renderFavorites();
+        // 重新渲染當前畫面以更新星星狀態
+        if (!document.getElementById('pageCategory').classList.contains('hidden')) renderCategoryTree(currentLetter);
+        if (!document.getElementById('pageSearch').classList.contains('hidden')) {
+            document.getElementById('searchInput').dispatchEvent(new Event('input'));
+        }
     }
 
-    // 智慧分類渲染收藏庫
     function renderFavorites() {
-        const container = document.getElementById('favContainer');
+        const container = document.getElementById('favList');
         const hint = document.getElementById('noFavHint');
-        
         if (favorites.length === 0) {
             container.innerHTML = '';
             hint.style.display = 'block';
             return;
         }
         hint.style.display = 'none';
-
-        // 進行分層歸類
-        const grouped = {};
-        favorites.forEach(code => {
-            const mainGroup = code.split('.')[0]; // 取得小數點前的代碼
-            if (!grouped[mainGroup]) grouped[mainGroup] = [];
-            grouped[mainGroup].push(code);
-        });
-
-        const sortedGroups = Object.keys(grouped).sort();
-
-        container.innerHTML = sortedGroups.map(group => {
-            const subItems = grouped[group];
-            const groupInfo = icdData.find(i => i.code === group) || { zh: "主分類" };
-            
+        container.innerHTML = favorites.map(code => {
+            const item = icdData.find(i => i.code === code) || { zh: "未知" };
             return `
-                <div class="bg-slate-800/50 rounded-lg overflow-hidden border border-slate-700">
-                    <div class="bg-slate-800 px-3 py-2 flex justify-between items-center">
-                        <div class="flex items-center gap-2">
-                            <span class="text-pink-400 font-bold code-font">${group}</span>
-                            <span class="text-xs text-slate-400">${groupInfo.zh}</span>
-                        </div>
-                        <span class="text-[10px] bg-slate-700 text-slate-400 px-2 py-0.5 rounded-full">${subItems.length}</span>
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center group cursor-pointer" onclick="handleAction('${code}', '${item.zh}')">
+                    <div>
+                        <div class="code-font font-bold text-sky-400">${code}</div>
+                        <div class="text-sm text-slate-300">${item.zh}</div>
                     </div>
-                    <div class="p-2 space-y-1">
-                        ${subItems.map(code => {
-                            const item = icdData.find(i => i.code === code);
-                            return `
-                                <div class="flex justify-between items-center p-2 hover:bg-slate-700/50 rounded group transition-all" 
-                                     onclick="handleAction('${code}', '${item?.zh || ''}')">
-                                    <div class="flex flex-col">
-                                        <span class="text-sm font-bold text-sky-400 code-font">${code}</span>
-                                        <span class="text-[11px] text-slate-400 truncate w-48">${item?.zh || ''}</span>
-                                    </div>
-                                    <button onclick="event.stopPropagation(); toggleFav('${code}')" class="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-red-400 p-1">✕</button>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
+                    <button onclick="event.stopPropagation(); toggleFav('${code}')" class="text-slate-500 hover:text-red-500">✕</button>
                 </div>
             `;
         }).join('');
     }
-
-    // 輸入監聽
-    let debounceTimer;
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            renderTable(e.target.value);
-        }, 300);
-    });
 
     init();
 </script>
