@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICD-10 智慧分層查詢系統V2.0</title>
+    <title>ICD-10 智慧分層樹狀系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -23,7 +23,7 @@
         .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         .code-font { font-family: 'JetBrains Mono', monospace; }
-        
+
         .tab-active {
             background: var(--accent);
             color: white !important;
@@ -33,7 +33,6 @@
         /* 樹狀分支連接線 */
         .branch-line {
             position: relative;
-            transition: all 0.3s ease-in-out;
         }
         .branch-line::before {
             content: '';
@@ -55,7 +54,7 @@
         }
 
         .active-star { color: var(--fav-star) !important; text-shadow: 0 0 8px rgba(251, 191, 36, 0.4); }
-        
+
         /* 字母導航 */
         .letter-btn {
             padding: 0.25rem 0.6rem;
@@ -71,24 +70,6 @@
 
         .animate-fadeIn { animation: fadeIn 0.3s ease-in; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* 摺疊動畫 */
-        .collapsible-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out, opacity 0.3s;
-            opacity: 0;
-        }
-        .collapsible-content.expanded {
-            max-height: 2000px; /* 大約高度，足以容納多個子項 */
-            opacity: 1;
-        }
-        .rotate-icon {
-            transition: transform 0.3s;
-        }
-        .rotate-icon.active {
-            transform: rotate(180deg);
-        }
     </style>
 </head>
 <body class="p-0 flex flex-col h-screen">
@@ -113,11 +94,11 @@
 
 <div class="flex-1 overflow-y-auto custom-scroll p-4 md:p-8">
     <div class="max-w-6xl mx-auto">
-        
+
         <!-- 頁籤一：搜尋頁面 -->
         <div id="pageSearch" class="space-y-6">
             <div class="bg-[#1e293b] rounded-2xl p-6 shadow-2xl border border-slate-700">
-                <input type="text" id="searchInput" 
+                <input type="text" id="searchInput"
                     class="w-full bg-slate-900 border-2 border-slate-700 rounded-xl px-5 py-4 text-lg focus:outline-none focus:border-sky-500 transition-all text-white"
                     placeholder="輸入診斷名稱或代碼...">
                 <div id="searchTree" class="mt-8 space-y-6">
@@ -126,7 +107,7 @@
             </div>
         </div>
 
-        <!-- 頁籤二：類別瀏覽 -->
+        <!-- 頁籤二：類別瀏覽 (單獨頁面) -->
         <div id="pageCategory" class="hidden animate-fadeIn space-y-6">
             <div class="flex justify-between items-center mb-4">
                 <h2 id="currentCategoryTitle" class="text-3xl font-bold text-sky-400">請選擇開頭字母</h2>
@@ -164,9 +145,10 @@
 <script>
     const DATA_URL = 'https://raw.githubusercontent.com/Robloxcooper6666/ICD-10/main/icd10_codes_combined.json';
     let icdData = [];
-    let favorites = JSON.parse(localStorage.getItem('icd_fav_tree_v3') || '[]');
+    let favorites = JSON.parse(localStorage.getItem('icd_fav_tree_v2') || '[]');
     let currentLetter = '';
 
+    // 初始化
     async function init() {
         try {
             const res = await fetch(DATA_URL);
@@ -180,6 +162,7 @@
         }
     }
 
+    // 初始化 A-Z 導覽
     function initLetterNav() {
         const nav = document.getElementById('letterNav');
         const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
@@ -188,6 +171,7 @@
         `).join('');
     }
 
+    // 選擇字母
     function selectLetter(l) {
         currentLetter = l;
         document.querySelectorAll('.letter-btn').forEach(b => b.classList.remove('active'));
@@ -196,6 +180,7 @@
         renderCategoryTree(l);
     }
 
+    // 頁籤切換
     function switchTab(tab) {
         const pages = ['pageSearch', 'pageCategory', 'pageFavorites'];
         const tabs = ['tabSearch', 'tabCategory', 'tabFavs'];
@@ -203,7 +188,7 @@
 
         pages.forEach(p => document.getElementById(p).classList.add('hidden'));
         tabs.forEach(t => document.getElementById(t).classList.remove('tab-active', 'text-slate-400'));
-        
+
         if (tab === 'search') {
             document.getElementById('pageSearch').classList.remove('hidden');
             document.getElementById('tabSearch').classList.add('tab-active');
@@ -221,21 +206,8 @@
         }
     }
 
-    // 摺疊/展開切換
-    function toggleCollapse(id) {
-        const content = document.getElementById('content-' + id);
-        const icon = document.getElementById('icon-' + id);
-        if (content.classList.contains('expanded')) {
-            content.classList.remove('expanded');
-            icon.classList.remove('active');
-        } else {
-            content.classList.add('expanded');
-            icon.classList.add('active');
-        }
-    }
-
-    // 核心渲染邏輯
-    function buildTreeHTML(data) {
+    // 核心渲染邏輯：樹狀分支
+    function buildTreeHTML(data, isSearch = false) {
         const groups = {};
         data.forEach(item => {
             const mainKey = item.code.split('.')[0];
@@ -249,47 +221,36 @@
             const group = groups[key];
             const main = group.main || { code: key, zh: "未分類大項", en: "" };
             const isFav = favorites.includes(main.code);
-            const safeId = key.replace('.', '_');
-            
+
             return `
                 <div class="category-group bg-slate-800/20 rounded-2xl border border-slate-700/50 p-6 overflow-hidden">
-                    <div class="flex items-center gap-4 cursor-pointer">
-                        <button onclick="toggleFav('${main.code}')" 
+                    <div class="flex items-center gap-4 cursor-pointer" onclick="handleAction('${main.code}', '${main.zh}')">
+                        <button onclick="event.stopPropagation(); toggleFav('${main.code}')"
                                 class="text-2xl text-slate-600 hover:text-amber-400 ${isFav ? 'active-star' : ''}">★</button>
-                        
-                        <div class="flex-1 flex items-center justify-between" onclick="toggleCollapse('${safeId}')">
-                            <div>
-                                <h4 class="text-xl font-bold text-pink-400 code-font">${main.code}</h4>
-                                <p class="text-slate-100 font-medium">${main.zh}</p>
-                            </div>
-                            <div class="flex items-center gap-4">
-                                <div class="text-slate-500 text-xs text-right">
-                                    ${group.children.length} 子項
-                                </div>
-                                <svg id="icon-${safeId}" class="rotate-icon w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                </svg>
-                            </div>
+                        <div class="flex-1">
+                            <h4 class="text-xl font-bold text-pink-400 code-font">${main.code}</h4>
+                            <p class="text-slate-100 font-medium">${main.zh}</p>
+                        </div>
+                        <div class="text-slate-500 text-xs text-right">
+                            ${group.children.length} 個子細項
                         </div>
                     </div>
 
                     ${group.children.length > 0 ? `
-                        <div id="content-${safeId}" class="collapsible-content">
-                            <div class="mt-6 ml-10 space-y-4 branch-line">
-                                ${group.children.map(sub => `
-                                    <div class="relative branch-item flex items-center gap-3 group">
-                                        <button onclick="toggleFav('${sub.code}')" 
-                                                class="text-sm text-slate-600 hover:text-amber-400 ${favorites.includes(sub.code) ? 'active-star' : ''}">★</button>
-                                        <div onclick="handleAction('${sub.code}', '${sub.zh}')" class="bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-700 group-hover:border-sky-500 transition-all cursor-pointer flex-1 flex justify-between">
-                                            <div>
-                                                <span class="code-font font-bold text-sky-400">${sub.code}</span>
-                                                <span class="ml-3 text-slate-200">${sub.zh}</span>
-                                            </div>
-                                            <span class="text-[10px] text-slate-500 opacity-0 group-hover:opacity-100 italic self-center">點擊複製</span>
+                        <div class="mt-6 ml-10 space-y-4 branch-line">
+                            ${group.children.map(sub => `
+                                <div class="relative branch-item flex items-center gap-3 group" onclick="handleAction('${sub.code}', '${sub.zh}')">
+                                    <button onclick="event.stopPropagation(); toggleFav('${sub.code}')"
+                                            class="text-sm text-slate-600 hover:text-amber-400 ${favorites.includes(sub.code) ? 'active-star' : ''}">★</button>
+                                    <div class="bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-700 group-hover:border-sky-500 transition-all cursor-pointer flex-1 flex justify-between">
+                                        <div>
+                                            <span class="code-font font-bold text-sky-400">${sub.code}</span>
+                                            <span class="ml-3 text-slate-200">${sub.zh}</span>
                                         </div>
+                                        <span class="text-[10px] text-slate-500 opacity-0 group-hover:opacity-100 italic self-center">點擊複製</span>
                                     </div>
-                                `).join('')}
-                            </div>
+                                </div>
+                            `).join('')}
                         </div>
                     ` : ''}
                 </div>
@@ -297,36 +258,35 @@
         }).join('');
     }
 
+    // 類別頁面渲染
     function renderCategoryTree(letter) {
         const container = document.getElementById('categoryTree');
         const filtered = icdData.filter(item => item.code.startsWith(letter));
         container.innerHTML = buildTreeHTML(filtered);
     }
 
+    // 搜尋頁面渲染
     document.getElementById('searchInput').addEventListener('input', (e) => {
         const query = e.target.value.trim().toLowerCase();
         const tree = document.getElementById('searchTree');
         if (!query) { tree.innerHTML = ''; return; }
-        const filtered = icdData.filter(item => 
-            item.code.toLowerCase().includes(query) || 
+
+        const filtered = icdData.filter(item =>
+            item.code.toLowerCase().includes(query) ||
             item.zh.toLowerCase().includes(query)
-        ).slice(0, 50);
-        tree.innerHTML = buildTreeHTML(filtered);
-        // 搜尋時預設展開
-        expandAllGroups(true);
+        ).slice(0, 25); // 搜尋限制 50 筆
+
+        tree.innerHTML = buildTreeHTML(filtered, true);
     });
 
+    // 展開/收合
     function expandAllGroups(expand) {
-        document.querySelectorAll('.collapsible-content').forEach(el => {
-            if(expand) el.classList.add('expanded');
-            else el.classList.remove('expanded');
-        });
-        document.querySelectorAll('.rotate-icon').forEach(el => {
-            if(expand) el.classList.add('active');
-            else el.classList.remove('active');
+        document.querySelectorAll('.branch-line').forEach(el => {
+            el.style.display = expand ? 'block' : 'none';
         });
     }
 
+    // 行為處理
     function handleAction(code, zh) {
         const el = document.createElement('textarea');
         el.value = code;
@@ -334,6 +294,7 @@
         el.select();
         document.execCommand('copy');
         document.body.removeChild(el);
+
         const toast = document.getElementById('toast');
         toast.innerText = `已複製 ${code}`;
         toast.style.opacity = '1';
@@ -344,13 +305,15 @@
         const idx = favorites.indexOf(code);
         if (idx > -1) favorites.splice(idx, 1);
         else favorites.push(code);
-        localStorage.setItem('icd_fav_tree_v3', JSON.stringify(favorites));
-        renderFavorites();
-        // 重新渲染當前畫面以更新星星狀態
+        localStorage.setItem('icd_fav_tree_v2', JSON.stringify(favorites));
+
+        // 重新渲染當前畫面
         if (!document.getElementById('pageCategory').classList.contains('hidden')) renderCategoryTree(currentLetter);
         if (!document.getElementById('pageSearch').classList.contains('hidden')) {
-            document.getElementById('searchInput').dispatchEvent(new Event('input'));
+            const val = document.getElementById('searchInput').value;
+            if(val) document.getElementById('searchInput').dispatchEvent(new Event('input'));
         }
+        renderFavorites();
     }
 
     function renderFavorites() {
@@ -362,6 +325,7 @@
             return;
         }
         hint.style.display = 'none';
+
         container.innerHTML = favorites.map(code => {
             const item = icdData.find(i => i.code === code) || { zh: "未知" };
             return `
