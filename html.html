@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICD-10 智慧分層樹狀系統</title>
+    <title>ICD-10 智慧分層樹狀系統V2.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -100,14 +100,14 @@
             <div class="bg-[#1e293b] rounded-2xl p-6 shadow-2xl border border-slate-700">
                 <input type="text" id="searchInput"
                     class="w-full bg-slate-900 border-2 border-slate-700 rounded-xl px-5 py-4 text-lg focus:outline-none focus:border-sky-500 transition-all text-white"
-                    placeholder="輸入診斷名稱或代碼...">
+                    placeholder="輸入關鍵字或代碼 (可用空格隔開多個關鍵字，如：高血壓 懷孕)...">
                 <div id="searchTree" class="mt-8 space-y-6">
                     <!-- 搜尋結果將以樹狀顯示 -->
                 </div>
             </div>
         </div>
 
-        <!-- 頁籤二：類別瀏覽 (單獨頁面) -->
+        <!-- 頁籤二：類別瀏覽 -->
         <div id="pageCategory" class="hidden animate-fadeIn space-y-6">
             <div class="flex justify-between items-center mb-4">
                 <h2 id="currentCategoryTitle" class="text-3xl font-bold text-sky-400">請選擇開頭字母</h2>
@@ -132,7 +132,7 @@
 
         <div id="loading" class="py-20 text-center text-slate-500">
             <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-sky-500 border-t-transparent mb-4"></div>
-            <p>正在初始化雲端資料庫...</p>
+            <p>正在初始化資料庫...</p>
         </div>
     </div>
 </div>
@@ -207,7 +207,9 @@
     }
 
     // 核心渲染邏輯：樹狀分支
-    function buildTreeHTML(data, isSearch = false) {
+    function buildTreeHTML(data) {
+        if (data.length === 0) return '<div class="text-center py-10 text-slate-500">查無結果</div>';
+        
         const groups = {};
         data.forEach(item => {
             const mainKey = item.code.split('.')[0];
@@ -219,7 +221,7 @@
         const sortedKeys = Object.keys(groups).sort();
         return sortedKeys.map(key => {
             const group = groups[key];
-            const main = group.main || { code: key, zh: "未分類大項", en: "" };
+            const main = group.main || { code: key, zh: "相關診斷項", en: "" };
             const isFav = favorites.includes(main.code);
 
             return `
@@ -265,18 +267,26 @@
         container.innerHTML = buildTreeHTML(filtered);
     }
 
-    // 搜尋頁面渲染
+    // 搜尋頁面渲染 (加強版：支援多關鍵字搜尋)
     document.getElementById('searchInput').addEventListener('input', (e) => {
         const query = e.target.value.trim().toLowerCase();
         const tree = document.getElementById('searchTree');
         if (!query) { tree.innerHTML = ''; return; }
 
-        const filtered = icdData.filter(item =>
-            item.code.toLowerCase().includes(query) ||
-            item.zh.toLowerCase().includes(query)
-        ).slice(0, 25); // 搜尋限制 50 筆
+        // 將輸入字串依空白分割成多個關鍵字
+        const keywords = query.split(/\s+/).filter(k => k.length > 0);
 
-        tree.innerHTML = buildTreeHTML(filtered, true);
+        const filtered = icdData.filter(item => {
+            const itemCode = item.code.toLowerCase();
+            const itemZh = item.zh.toLowerCase();
+            
+            // 必須包含「所有」輸入的關鍵字 (交集)
+            return keywords.every(kw => 
+                itemCode.includes(kw) || itemZh.includes(kw)
+            );
+        }).slice(0, 40); // 增加顯示上限至 40 筆
+
+        tree.innerHTML = buildTreeHTML(filtered);
     });
 
     // 展開/收合
@@ -286,7 +296,7 @@
         });
     }
 
-    // 行為處理
+    // 行為處理 (複製代碼)
     function handleAction(code, zh) {
         const el = document.createElement('textarea');
         el.value = code;
@@ -301,13 +311,14 @@
         setTimeout(() => toast.style.opacity = '0', 2000);
     }
 
+    // 我的最愛邏輯
     function toggleFav(code) {
         const idx = favorites.indexOf(code);
         if (idx > -1) favorites.splice(idx, 1);
         else favorites.push(code);
         localStorage.setItem('icd_fav_tree_v2', JSON.stringify(favorites));
 
-        // 重新渲染當前畫面
+        // 重新渲染當前畫面以更新星星狀態
         if (!document.getElementById('pageCategory').classList.contains('hidden')) renderCategoryTree(currentLetter);
         if (!document.getElementById('pageSearch').classList.contains('hidden')) {
             const val = document.getElementById('searchInput').value;
@@ -327,7 +338,7 @@
         hint.style.display = 'none';
 
         container.innerHTML = favorites.map(code => {
-            const item = icdData.find(i => i.code === code) || { zh: "未知" };
+            const item = icdData.find(i => i.code === code) || { zh: "未知診斷" };
             return `
                 <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center group cursor-pointer" onclick="handleAction('${code}', '${item.zh}')">
                     <div>
