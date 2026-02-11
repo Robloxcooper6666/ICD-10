@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICD-10 智慧分層樹狀系統V2.1</title>
+    <title>ICD-10 智慧分層樹狀系統V2.2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -17,12 +17,12 @@
         body {
             background-color: var(--bg-deep);
             color: var(--text-main);
-            font-family: 'Inter', 'PingFang TC', sans-serif;
+            font-family: 'Inter', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
             overflow-x: hidden;
         }
         .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        .code-font { font-family: 'JetBrains Mono', monospace; }
+        .code-font { font-family: 'JetBrains Mono', 'Consolas', monospace; }
 
         .tab-active {
             background: var(--accent);
@@ -70,6 +70,11 @@
 
         .animate-fadeIn { animation: fadeIn 0.3s ease-in; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .highlight-text {
+            color: var(--highlight);
+            font-weight: bold;
+        }
     </style>
 </head>
 <body class="p-0 flex flex-col h-screen">
@@ -78,7 +83,10 @@
 <nav class="bg-slate-900 border-b border-slate-800 shrink-0 z-50 shadow-xl">
     <div class="max-w-7xl mx-auto px-6 py-3">
         <div class="flex justify-between items-center mb-3">
-            <h1 class="text-xl font-bold text-sky-400">ICD-10 智慧系統</h1>
+            <h1 class="text-xl font-bold text-sky-400 flex items-center gap-2">
+                <span class="bg-sky-500/20 p-1 rounded">ICD-10</span>
+                <span>智慧檢索系統 V2.2</span>
+            </h1>
             <div class="flex bg-slate-800 rounded-lg p-1 gap-1">
                 <button onclick="switchTab('search')" id="tabSearch" class="px-4 py-1.5 text-sm font-medium tab-active">🔍 搜尋</button>
                 <button onclick="switchTab('category')" id="tabCategory" class="px-4 py-1.5 text-sm font-medium text-slate-400 hover:text-white">🗂️ 類別瀏覽</button>
@@ -98,22 +106,36 @@
         <!-- 頁籤一：搜尋頁面 -->
         <div id="pageSearch" class="space-y-6">
             <div class="bg-[#1e293b] rounded-2xl p-6 shadow-2xl border border-slate-700">
-                <input type="text" id="searchInput"
-                    class="w-full bg-slate-900 border-2 border-slate-700 rounded-xl px-5 py-4 text-lg focus:outline-none focus:border-sky-500 transition-all text-white"
-                    placeholder="輸入關鍵字或代碼 (可用空格隔開多個關鍵字，如：高血壓 懷孕)...">
+                <div class="relative">
+                    <input type="text" id="searchInput"
+                        class="w-full bg-slate-900 border-2 border-slate-700 rounded-xl px-5 py-4 text-lg focus:outline-none focus:border-sky-500 transition-all text-white pr-12"
+                        placeholder="搜尋代碼、中文或英文關鍵字 (例如：高血壓 Pregnancy I10)...">
+                    <div class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500">
+                        <kbd class="bg-slate-800 px-2 py-1 rounded text-xs border border-slate-700">ESC</kbd>
+                    </div>
+                </div>
+                
+                <div id="searchInfo" class="mt-3 text-sm text-slate-400 hidden">
+                    找到 <span id="resultCount" class="text-sky-400 font-bold">0</span> 筆結果
+                </div>
+
                 <div id="searchTree" class="mt-8 space-y-6">
                     <!-- 搜尋結果將以樹狀顯示 -->
+                    <div class="text-center py-20 text-slate-600">
+                        <div class="text-4xl mb-4">🩺</div>
+                        <p>請輸入臨床診斷關鍵字或代碼開始查詢</p>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- 頁籤二：類別瀏覽 -->
         <div id="pageCategory" class="hidden animate-fadeIn space-y-6">
-            <div class="flex justify-between items-center mb-4">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
                 <h2 id="currentCategoryTitle" class="text-3xl font-bold text-sky-400">請選擇開頭字母</h2>
                 <div class="flex gap-4">
-                    <button onclick="expandAllGroups(true)" class="text-sm bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg border border-slate-600">全部展開</button>
-                    <button onclick="expandAllGroups(false)" class="text-sm bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg border border-slate-600">全部收合</button>
+                    <button onclick="expandAllGroups(true)" class="text-sm bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg border border-slate-600 transition-colors">全部展開</button>
+                    <button onclick="expandAllGroups(false)" class="text-sm bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg border border-slate-600 transition-colors">全部收合</button>
                 </div>
             </div>
             <div id="categoryTree" class="space-y-8">
@@ -123,29 +145,35 @@
 
         <!-- 頁籤三：我的最愛 -->
         <div id="pageFavorites" class="hidden animate-fadeIn space-y-6">
-            <div class="bg-slate-900 border-2 border-sky-500/30 rounded-2xl p-6">
-                <h3 class="text-2xl font-bold text-amber-400 mb-6 flex items-center gap-2">⭐ 我的收藏清單</h3>
+            <div class="bg-slate-900 border-2 border-sky-500/30 rounded-2xl p-6 shadow-2xl">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold text-amber-400 flex items-center gap-2">⭐ 我的收藏清單</h3>
+                    <button onclick="clearAllFavorites()" class="text-xs text-slate-500 hover:text-red-400 transition-colors underline">清除所有收藏</button>
+                </div>
                 <div id="favList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-                <div id="noFavHint" class="text-center py-20 text-slate-500">尚無收藏項目</div>
+                <div id="noFavHint" class="text-center py-20 text-slate-500">
+                    <p class="text-lg mb-2">尚未收藏任何代碼</p>
+                    <p class="text-sm">在搜尋結果或類別中點擊星號即可收藏</p>
+                </div>
             </div>
         </div>
 
         <div id="loading" class="py-20 text-center text-slate-500">
             <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-sky-500 border-t-transparent mb-4"></div>
-            <p>正在初始化資料庫...</p>
+            <p class="text-lg">正在載入 ICD-10 診斷資料庫...</p>
         </div>
     </div>
 </div>
 
 <!-- 複製提示 -->
-<div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-sky-500 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 transition-opacity pointer-events-none z-50 font-bold">
+<div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-sky-500 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 transition-all pointer-events-none z-50 font-bold scale-90">
     已複製代碼！
 </div>
 
 <script>
     const DATA_URL = 'https://raw.githubusercontent.com/Robloxcooper6666/ICD-10/main/icd10_codes_combined.json';
     let icdData = [];
-    let favorites = JSON.parse(localStorage.getItem('icd_fav_tree_v2') || '[]');
+    let favorites = JSON.parse(localStorage.getItem('icd_fav_tree_v2.2') || '[]');
     let currentLetter = '';
 
     // 初始化
@@ -153,12 +181,25 @@
         try {
             const res = await fetch(DATA_URL);
             icdData = await res.json();
+            
+            // 預處理資料，增加搜尋優化的標記（如果 JSON 沒有 en，則視為空字串）
+            icdData = icdData.map(item => ({
+                ...item,
+                en: item.en || '',
+                searchBlob: `${item.code} ${item.zh} ${item.en || ''}`.toLowerCase()
+            }));
+
             document.getElementById('loading').style.display = 'none';
             initLetterNav();
             switchTab('search');
             renderFavorites();
         } catch (err) {
-            document.getElementById('loading').innerText = '資料載入失敗。';
+            document.getElementById('loading').innerHTML = `
+                <div class="text-red-400">
+                    <p class="text-xl font-bold">資料載入失敗</p>
+                    <p class="text-sm">請檢查網路連線或稍後再試</p>
+                </div>
+            `;
         }
     }
 
@@ -175,7 +216,8 @@
     function selectLetter(l) {
         currentLetter = l;
         document.querySelectorAll('.letter-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(`btn-letter-${l}`).classList.add('active');
+        const btn = document.getElementById(`btn-letter-${l}`);
+        if(btn) btn.classList.add('active');
         document.getElementById('currentCategoryTitle').innerText = `開頭為 ${l} 的診斷類別`;
         renderCategoryTree(l);
     }
@@ -187,27 +229,35 @@
         const letterNav = document.getElementById('letterNav');
 
         pages.forEach(p => document.getElementById(p).classList.add('hidden'));
-        tabs.forEach(t => document.getElementById(t).classList.remove('tab-active', 'text-slate-400'));
+        tabs.forEach(t => {
+            const el = document.getElementById(t);
+            el.classList.remove('tab-active');
+            el.classList.add('text-slate-400');
+        });
 
         if (tab === 'search') {
             document.getElementById('pageSearch').classList.remove('hidden');
             document.getElementById('tabSearch').classList.add('tab-active');
+            document.getElementById('tabSearch').classList.remove('text-slate-400');
             letterNav.classList.add('hidden');
+            document.getElementById('searchInput').focus();
         } else if (tab === 'category') {
             document.getElementById('pageCategory').classList.remove('hidden');
             document.getElementById('tabCategory').classList.add('tab-active');
+            document.getElementById('tabCategory').classList.remove('text-slate-400');
             letterNav.classList.remove('hidden');
             if(!currentLetter) selectLetter('A');
         } else {
             document.getElementById('pageFavorites').classList.remove('hidden');
             document.getElementById('tabFavs').classList.add('tab-active');
+            document.getElementById('tabFavs').classList.remove('text-slate-400');
             letterNav.classList.add('hidden');
             renderFavorites();
         }
     }
 
     // 核心渲染邏輯：樹狀分支
-    function buildTreeHTML(data) {
+    function buildTreeHTML(data, isSearch = false) {
         if (data.length === 0) return '<div class="text-center py-10 text-slate-500">查無結果</div>';
         
         const groups = {};
@@ -221,35 +271,39 @@
         const sortedKeys = Object.keys(groups).sort();
         return sortedKeys.map(key => {
             const group = groups[key];
-            const main = group.main || { code: key, zh: "相關診斷項", en: "" };
+            const main = group.main || { code: key, zh: "相關診斷分類", en: "" };
             const isFav = favorites.includes(main.code);
 
             return `
-                <div class="category-group bg-slate-800/20 rounded-2xl border border-slate-700/50 p-6 overflow-hidden">
-                    <div class="flex items-center gap-4 cursor-pointer" onclick="handleAction('${main.code}', '${main.zh}')">
+                <div class="category-group bg-slate-800/20 rounded-2xl border border-slate-700/50 p-5 overflow-hidden transition-all hover:border-slate-600">
+                    <div class="flex items-start gap-4 cursor-pointer" onclick="handleAction('${main.code}', '${main.zh}')">
                         <button onclick="event.stopPropagation(); toggleFav('${main.code}')"
-                                class="text-2xl text-slate-600 hover:text-amber-400 ${isFav ? 'active-star' : ''}">★</button>
+                                class="text-2xl text-slate-600 hover:text-amber-400 transition-colors ${isFav ? 'active-star' : ''}">★</button>
                         <div class="flex-1">
                             <h4 class="text-xl font-bold text-pink-400 code-font">${main.code}</h4>
                             <p class="text-slate-100 font-medium">${main.zh}</p>
+                            ${main.en ? `<p class="text-slate-500 text-xs mt-1 uppercase italic">${main.en}</p>` : ''}
                         </div>
-                        <div class="text-slate-500 text-xs text-right">
+                        <div class="text-slate-600 text-[10px] text-right">
                             ${group.children.length} 個子細項
                         </div>
                     </div>
 
                     ${group.children.length > 0 ? `
-                        <div class="mt-6 ml-10 space-y-4 branch-line">
+                        <div class="mt-4 ml-10 space-y-3 branch-line">
                             ${group.children.map(sub => `
                                 <div class="relative branch-item flex items-center gap-3 group" onclick="handleAction('${sub.code}', '${sub.zh}')">
                                     <button onclick="event.stopPropagation(); toggleFav('${sub.code}')"
-                                            class="text-sm text-slate-600 hover:text-amber-400 ${favorites.includes(sub.code) ? 'active-star' : ''}">★</button>
-                                    <div class="bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-700 group-hover:border-sky-500 transition-all cursor-pointer flex-1 flex justify-between">
-                                        <div>
-                                            <span class="code-font font-bold text-sky-400">${sub.code}</span>
-                                            <span class="ml-3 text-slate-200">${sub.zh}</span>
+                                            class="text-sm text-slate-600 hover:text-amber-400 transition-colors ${favorites.includes(sub.code) ? 'active-star' : ''}">★</button>
+                                    <div class="bg-slate-800/40 px-4 py-2 rounded-lg border border-slate-700/50 group-hover:border-sky-500/50 transition-all cursor-pointer flex-1">
+                                        <div class="flex justify-between items-start">
+                                            <div class="flex-1">
+                                                <span class="code-font font-bold text-sky-400">${sub.code}</span>
+                                                <span class="ml-3 text-slate-200">${sub.zh}</span>
+                                            </div>
+                                            <span class="text-[10px] text-slate-500 opacity-0 group-hover:opacity-100 italic transition-opacity">Copy</span>
                                         </div>
-                                        <span class="text-[10px] text-slate-500 opacity-0 group-hover:opacity-100 italic self-center">點擊複製</span>
+                                        ${sub.en ? `<div class="text-[10px] text-slate-500 mt-0.5 uppercase tracking-wide truncate max-w-[280px] md:max-w-none">${sub.en}</div>` : ''}
                                     </div>
                                 </div>
                             `).join('')}
@@ -267,26 +321,43 @@
         container.innerHTML = buildTreeHTML(filtered);
     }
 
-    // 搜尋頁面渲染 (加強版：支援多關鍵字搜尋)
+    // 搜尋功能：優化多關鍵字與中英混合
     document.getElementById('searchInput').addEventListener('input', (e) => {
         const query = e.target.value.trim().toLowerCase();
         const tree = document.getElementById('searchTree');
-        if (!query) { tree.innerHTML = ''; return; }
+        const info = document.getElementById('searchInfo');
+        
+        if (!query) { 
+            tree.innerHTML = `
+                <div class="text-center py-20 text-slate-600">
+                    <div class="text-4xl mb-4">🩺</div>
+                    <p>請輸入臨床診斷關鍵字或代碼開始查詢</p>
+                </div>
+            `; 
+            info.classList.add('hidden');
+            return; 
+        }
 
-        // 將輸入字串依空白分割成多個關鍵字
+        // 分割關鍵字，支援中英混合
         const keywords = query.split(/\s+/).filter(k => k.length > 0);
 
         const filtered = icdData.filter(item => {
-            const itemCode = item.code.toLowerCase();
-            const itemZh = item.zh.toLowerCase();
-            
-            // 必須包含「所有」輸入的關鍵字 (交集)
-            return keywords.every(kw => 
-                itemCode.includes(kw) || itemZh.includes(kw)
-            );
-        }).slice(0, 40); // 增加顯示上限至 40 筆
+            // 必須包含「所有」輸入的關鍵字 (AND 邏輯)
+            return keywords.every(kw => item.searchBlob.includes(kw));
+        }).slice(0, 100); // 擴大搜尋範圍到 100 筆
 
-        tree.innerHTML = buildTreeHTML(filtered);
+        document.getElementById('resultCount').innerText = filtered.length;
+        info.classList.remove('hidden');
+        tree.innerHTML = buildTreeHTML(filtered, true);
+    });
+
+    // 鍵盤監聽
+    window.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape') {
+            const input = document.getElementById('searchInput');
+            input.value = '';
+            input.dispatchEvent(new Event('input'));
+        }
     });
 
     // 展開/收合
@@ -306,9 +377,16 @@
         document.body.removeChild(el);
 
         const toast = document.getElementById('toast');
-        toast.innerText = `已複製 ${code}`;
+        toast.innerText = `已複製: ${code}`;
         toast.style.opacity = '1';
-        setTimeout(() => toast.style.opacity = '0', 2000);
+        toast.classList.remove('scale-90');
+        toast.classList.add('scale-100');
+        
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.classList.remove('scale-100');
+            toast.classList.add('scale-90');
+        }, 1500);
     }
 
     // 我的最愛邏輯
@@ -316,39 +394,57 @@
         const idx = favorites.indexOf(code);
         if (idx > -1) favorites.splice(idx, 1);
         else favorites.push(code);
-        localStorage.setItem('icd_fav_tree_v2', JSON.stringify(favorites));
+        localStorage.setItem('icd_fav_tree_v2.2', JSON.stringify(favorites));
 
-        // 重新渲染當前畫面以更新星星狀態
-        if (!document.getElementById('pageCategory').classList.contains('hidden')) renderCategoryTree(currentLetter);
-        if (!document.getElementById('pageSearch').classList.contains('hidden')) {
-            const val = document.getElementById('searchInput').value;
-            if(val) document.getElementById('searchInput').dispatchEvent(new Event('input'));
-        }
+        // 局部更新狀態（搜尋與類別瀏覽）
+        const starBtns = document.querySelectorAll(`button[onclick*="'${code}'"]`);
+        starBtns.forEach(btn => {
+            if (favorites.includes(code)) btn.classList.add('active-star');
+            else btn.classList.remove('active-star');
+        });
+
         renderFavorites();
+    }
+
+    function clearAllFavorites() {
+        if(confirm('確定要清空所有收藏嗎？')) {
+            favorites = [];
+            localStorage.setItem('icd_fav_tree_v2.2', JSON.stringify(favorites));
+            location.reload();
+        }
     }
 
     function renderFavorites() {
         const container = document.getElementById('favList');
         const hint = document.getElementById('noFavHint');
+        
         if (favorites.length === 0) {
             container.innerHTML = '';
-            hint.style.display = 'block';
+            hint.classList.remove('hidden');
             return;
         }
-        hint.style.display = 'none';
+        hint.classList.add('hidden');
 
-        container.innerHTML = favorites.map(code => {
-            const item = icdData.find(i => i.code === code) || { zh: "未知診斷" };
-            return `
-                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center group cursor-pointer" onclick="handleAction('${code}', '${item.zh}')">
-                    <div>
-                        <div class="code-font font-bold text-sky-400">${code}</div>
-                        <div class="text-sm text-slate-300">${item.zh}</div>
-                    </div>
-                    <button onclick="event.stopPropagation(); toggleFav('${code}')" class="text-slate-500 hover:text-red-500">✕</button>
+        // 保持最愛清單最新資訊
+        const favItems = favorites.map(code => {
+            return icdData.find(i => i.code === code) || { code, zh: "已從庫中移除", en: "" };
+        });
+
+        container.innerHTML = favItems.map(item => `
+            <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700 flex justify-between items-center group cursor-pointer hover:bg-slate-800 transition-all" 
+                 onclick="handleAction('${item.code}', '${item.zh}')">
+                <div class="overflow-hidden">
+                    <div class="code-font font-bold text-sky-400">${item.code}</div>
+                    <div class="text-sm text-slate-100 truncate">${item.zh}</div>
+                    ${item.en ? `<div class="text-[10px] text-slate-500 uppercase truncate">${item.en}</div>` : ''}
                 </div>
-            `;
-        }).join('');
+                <button onclick="event.stopPropagation(); toggleFav('${item.code}')" class="ml-4 text-slate-500 hover:text-red-500 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+        `).join('');
     }
 
     init();
